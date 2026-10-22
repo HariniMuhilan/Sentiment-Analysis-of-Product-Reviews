@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+*/node_modules/
+.pnp
+.pnp.js
+
+# Production build outputs
+dist/
+dist-ssr/
+*/dist/
+build/
+
+# Dataset files (large raw data files >50GB omitted from git tracking)
+Datasets/**/*.tsv
+Datasets/**/*.csv
+Datasets/**/*.zip
+Datasets/**/*.gz
+Datasets/**/*.parquet
+Datasets/**/*.json
+Datasets/**/*.tar
+Datasets/Amazon/Amazon/
+Datasets/Flipkart/Flipkart_Extracted/
+Datasets/Myntra/Myntra_Extracted/
+
+# Environment and local configs
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor & OS files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
