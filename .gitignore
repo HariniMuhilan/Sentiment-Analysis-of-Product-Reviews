@@ -40,6 +40,20 @@ Datasets/Meesho/
 
 # Retain sample authorized demo file
 !Datasets/sample_authorized_reviews.csv
+!Datasets/OlistBrazilianEcommerce/
+!Datasets/OlistBrazilianEcommerce/raw/
+Datasets/OlistBrazilianEcommerce/raw/*
+!Datasets/OlistBrazilianEcommerce/raw/olist_order_reviews_dataset.csv
+!Datasets/OlistBrazilianEcommerce/raw/olist_order_items_dataset.csv
+!Datasets/OlistBrazilianEcommerce/raw/olist_products_dataset.csv
+!Datasets/OlistBrazilianEcommerce/raw/product_category_name_translation.csv
+!Datasets/OlistBrazilianEcommerce/
+!Datasets/OlistBrazilianEcommerce/raw/
+Datasets/OlistBrazilianEcommerce/raw/*
+!Datasets/OlistBrazilianEcommerce/raw/olist_order_reviews_dataset.csv
+!Datasets/OlistBrazilianEcommerce/raw/olist_order_items_dataset.csv
+!Datasets/OlistBrazilianEcommerce/raw/olist_products_dataset.csv
+!Datasets/OlistBrazilianEcommerce/raw/product_category_name_translation.csv
 
 # Environment and local configs
 .env

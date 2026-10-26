@@ -1,7 +1,7 @@
 {
   "project": "Sentiment Analysis Review",
   "manifest_version": "2.0.0",
-  "generated_at": "2026-10-26T14:22:47.600964+00:00",
+  "generated_at": "2026-10-26T15:51:29+00:00",
   "local_research_database": {
     "path": "backend/sentiment_research.db",
     "review_count": 2797473,
@@ -75,10 +75,58 @@
       "record_count": 43,
       "empirical_status": "EXCLUDED_FROM_EMPIRICAL_STUDY",
       "purpose": "Software tests and UI smoke demonstration only; not customer data and not empirical evidence."
+    },
+    {
+      "id": "OLIST-BRAZIL-ECOMMERCE-2018",
+      "name": "Brazilian E-Commerce Public Dataset by Olist (selected source tables)",
+      "type": "supplementary_marketplace_review_corpus",
+      "provider": "Olist and collaborators; Kaggle dataset record",
+      "source_url": "https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce",
+      "retrieval_mirror": "https://github.com/ductransponster/olist-brazilian-ecommerce",
+      "license": "CC BY-NC-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "downloaded_at": "2026-10-26",
+      "source_platform": "Olist Brazil",
+      "country": "Brazil",
+      "language": "Portuguese (primarily)",
+      "source_review_rows": 99224,
+      "prepared_written_review_rows": 40317,
+      "excluded_ambiguous_or_missing_product_link": 3997,
+      "excluded_without_written_review_text": 54910,
+      "prepared_data_path": "Datasets/OlistBrazilianEcommerce/processed/olist_single_product_reviews.csv",
+      "preparation_script": "research/prepare_olist_reviews.py",
+      "prepared_into_main_database": false,
+      "source_files": [
+        {
+          "path": "Datasets/OlistBrazilianEcommerce/raw/olist_order_reviews_dataset.csv",
+          "sha256": "81336b6e5183133b632a3d9ed899428e33430987fa540926a6daa8b4a2157598"
+        },
+        {
+          "path": "Datasets/OlistBrazilianEcommerce/raw/olist_order_items_dataset.csv",
+          "sha256": "0bc4d068c4fe38cbb01bd90e8746e3c613fe7b4baef75fab7b0e329701c3e279"
+        },
+        {
+          "path": "Datasets/OlistBrazilianEcommerce/raw/olist_products_dataset.csv",
+          "sha256": "3e6569628a17fbc75fd206ee357b59e20364b9afa90f5b6cd5b4d624c58aa9cc"
+        },
+        {
+          "path": "Datasets/OlistBrazilianEcommerce/raw/product_category_name_translation.csv",
+          "sha256": "9da093e114e517534d7a6903b253b0d24a582830b99ea9e8ef48a90b79d60967"
+        }
+      ],
+      "limitations": [
+        "Review is associated with an order; only orders with one distinct product ID are retained to avoid review duplication across products.",
+        "Source has no human-readable product titles or global IDs; same-model matches to Amazon cannot be made.",
+        "Portuguese text is outside the validated language coverage of this project's current English-oriented VADER model.",
+        "Ratings are order-level weak satisfaction labels, not human-annotated sentiment ground truth.",
+        "CC BY-NC-SA terms apply to data and derivatives; the repository's MIT code license does not replace them."
+      ],
+      "attribution": "Olist and collaborators. Brazilian E-Commerce Public Dataset by Olist. Kaggle. CC BY-NC-SA 4.0. https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce"
     }
   ],
   "not_included": [
-    "No additional cross-platform review corpus is included. Public candidates and pending rights checks are documented in research/cross_platform_data_clearance.md.",
+    "No dataset with reviews of the same identified product model across multiple retailers is included. Public candidates and pending rights checks are documented in research/cross_platform_data_clearance.md.",
+    "The Olist supplementary corpus is separate from and not loaded into the main application database.",
     "No authorized Flipkart, Myntra, Meesho, Daraz, or Pickaboo review corpus is included.",
     "Amazon Reviews 2023 files and this derived database are not committed to the repository."
   ]

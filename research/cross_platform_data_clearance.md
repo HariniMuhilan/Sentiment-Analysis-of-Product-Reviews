@@ -13,6 +13,7 @@ The currently imported Amazon Reviews 2023 corpus remains the only active source
 
 | Source | Public availability and reported size | Research fit | Clearance outcome |
 |---|---|---|---|
+| Olist Brazilian E-Commerce Public Dataset | Olist-published Kaggle dataset, 99,224 order-review rows, 2016–2018; CC BY-NC-SA 4.0. | Named Brazilian e-commerce source with review text, ratings, product IDs, and categories. Product title is absent; reviews attach to orders, not directly to products. | **Included as a supplementary corpus.** The preparation script yields 40,317 written reviews linked to a single distinct product. Keep separate from the main Amazon corpus; Portuguese VADER scores are unsupported and product models cannot be matched across retailers. |
 | Pandey et al., Amazon + Flipkart + Myntra | The paper reports 23,664 collected reviews (15,432 after deduplication) from four categories; data is available on request, not as a direct public download. | Best match to the intended India-focused marketplace comparison. Product-level matching coverage still needs to be verified. | **Request access and written reuse terms.** Authors report following platform terms, but the dataset and reuse license are not publicly available. Do not imply permission has been granted. |
 | Rashid et al., Daraz + Pickaboo | Public Mendeley Data record, CC BY 4.0; paper reports 78,130 samples across 152 product categories and manually annotated sentiment/emotion. | Actual product-review text from two platforms; Bengali and English. Potential external-market validation, but platform, country, and language differ from the current Amazon corpus. | **Hold pending rights clarification.** Mendeley’s license notice says additional permission may be needed for third-party content. Daraz terms prohibit data-mining/robots and downloading or copying site content. |
 | EComReviews-BD, Daraz | Public Mendeley Data record, CC BY 4.0; 20,685 reviews across 19 categories and 483 products, manually labeled for overall and aspect sentiment. | Strong annotated benchmark, but only one platform. Could validate multilingual/aspect models if rights are cleared. | **Hold pending rights clarification.** Same third-party-content caveat and Daraz terms issue. Review overlap with other Daraz corpora is unknown. |
@@ -23,6 +24,7 @@ The currently imported Amazon Reviews 2023 corpus remains the only active source
 | Meesho datasets found in search | One prominently indexed GitHub release explicitly says it is generated sample data because live review access is blocked. Other surfaced sources were app reviews or commercial extraction services. | The generated file is not real customer review evidence; app reviews measure application experience rather than product experience. | **Exclude from product-review analysis.** Do not include generated or app-store text as marketplace product reviews. |
 | ShoppingAppReviews | Public Mendeley Data release, CC BY-NC 4.0, 751,500 reviews across 12 shopping apps, including Amazon, Flipkart, Meesho, and Myntra. | App-store reviews concern app usability/service, not the products sold. | **Out of scope.** Do not mix app-experience reviews with product reviews. |
 | UCI Turkish User Reviews | Public UCI release, CC BY 4.0, 37,056 reported Turkish-language instances grouped by product category. | UCI does not identify the marketplace, and the records lack product identifiers and ratings. | **Excluded from this project.** It cannot support the required named-platform or cross-platform product comparison. |
+| Customer Sentiment Dataset (Kaggle, Kundan Sagar Bedmutha) | Public Kaggle listing, CC BY 4.0, claims 25,000 rows across Amazon, Flipkart, Meesho, Myntra, and other sources. | The listing says review text was generated to match assigned sentiment and rating. | **Excluded as synthetic.** It is not authentic customer-review evidence. |
 
 ## Research design consequences
 
@@ -46,6 +48,9 @@ The currently imported Amazon Reviews 2023 corpus remains the only active source
 - Myntra catalog example (metadata, not reviews): <https://huggingface.co/datasets/Gssmc/myntra_dataset>
 - Meesho generated sample-data note: <https://github.com/Neelx/meesho_dataset/blob/main/DATASET_SUMMARY.md>
 - ShoppingAppReviews (app reviews, CC BY-NC 4.0): <https://data.mendeley.com/datasets/chr5b94c6y/2>
+- Olist Brazilian E-Commerce Public Dataset (Kaggle; CC BY-NC-SA 4.0): <https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce>
+- Olist retrieval mirror used for the four source tables: <https://github.com/ductransponster/olist-brazilian-ecommerce>
+- Synthetic Customer Sentiment Dataset (Kaggle): <https://www.kaggle.com/datasets/kundanbedmutha/customer-sentiment-dataset>
 
 ## Next clearance step
 

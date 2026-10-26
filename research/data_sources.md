@@ -26,6 +26,10 @@ The repository's `.gitignore` excludes downloaded JSONL files and SQLite databas
 - The project currently makes no empirical claims about Flipkart, Myntra, Meesho, Daraz, or Pickaboo.
 - The Amazon Reviews Multi/MARC corpus is not included in the current database. Dataset mirrors carry inconsistent license metadata; do not describe it as CC-BY-4.0 without authoritative confirmation.
 
+## Supplementary dataset included in the repository
+
+The repository now contains a separate Olist Brazil corpus under CC BY-NC-SA 4.0. It is not yet imported into the application's Amazon database. A reproducible preparation script filters to text-bearing reviews from single-distinct-product orders, producing 40,317 records from the 99,224 source order-review rows. Product IDs are internal to Olist and cannot be joined to Amazon product models. Portuguese text must be analyzed with a suitable Portuguese-capable model; the current VADER output is not valid evidence for it. See [`Datasets/OlistBrazilianEcommerce/README.md`](../Datasets/OlistBrazilianEcommerce/README.md) and the manifest for details.
+
 ## Research limitations
 
 - The active data is from one marketplace, so it cannot support cross-platform comparisons.

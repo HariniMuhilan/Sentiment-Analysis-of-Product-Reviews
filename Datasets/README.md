@@ -44,3 +44,9 @@ The original 43-row synthetic fixture remains available at `Datasets/sample_auth
 ## Other marketplaces
 
 No authorized Flipkart, Myntra, or Meesho review corpus is currently included. Community uploads with unclear provenance or scraping-derived data are excluded. Cross-platform claims require licensed data or written research access from each marketplace.
+
+## Olist Brazil (supplementary marketplace corpus)
+
+The project includes four source tables from the [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), published under **CC BY-NC-SA 4.0**. It provides a second named e-commerce source alongside Amazon. Only orders with an unambiguous one-product link and written review text are prepared: the current snapshot yields 40,317 records from 99,224 order-level review rows. Product names are not included, so this supports separate platform/category-level analysis, not matching the same product model across Amazon and Olist.
+
+The reviews are primarily Portuguese, so the current VADER model must not be treated as valid for this corpus. The 1–5 order rating is a weak satisfaction signal, not human-annotated sentiment. See [`OlistBrazilianEcommerce/README.md`](OlistBrazilianEcommerce/README.md) for the license, provenance, preparation command, hashes, and limits. The prepared rows are kept out of the main application database until Portuguese-capable sentiment analysis is added.
