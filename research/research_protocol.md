@@ -1,8 +1,8 @@
 # Research Protocol & Methodology Specification
 
-**Project Title**: Empirical Evaluation of Lexical Sentiment Analysis in Cross-Platform E-Commerce Product Reviews: Rating-Text Divergence, Domain Transferability, and Statistical Validity  
+**Project Title**: Evaluating Lexical Sentiment in Historical Amazon Product Reviews: Rating-Text Agreement, Domain Variation, and Reproducibility
 **Version**: 1.0.0 (Pre-Registration Draft)  
-**Status**: Pre-registered protocol before full-scale human annotation and empirical runs  
+**Status**: Working protocol draft; this document has not been externally time-stamped or formally pre-registered
 
 ---
 
@@ -11,13 +11,13 @@
 ### Primary Research Questions
 - **RQ1 (Empirical Validity of Rule-Based Lexical Sentiment)**: How reliably does an unsupervised, rule-based lexical classifier (VADER) classify e-commerce product review sentiment into Positive, Neutral, and Negative categories when evaluated against independent, double-annotated human ground truth?
 - **RQ2 (Star Rating vs. Text Sentiment Divergence)**: How frequently and under what circumstances do numerical star ratings (1–5) diverge from semantic text sentiment, and does treating star ratings as pseudo-labels introduce systematic measurement error?
-- **RQ3 (Cross-Marketplace Confounding)**: Are cross-platform sentiment variations primarily attributable to platform characteristics, or are they confounded by category distribution, product price point, review length, and linguistic style?
+- **RQ3 (Within-Amazon Domain Variation)**: How do rating-text agreement and VADER sentiment distributions differ between the included All Beauty and Appliances domains, and how are those differences associated with review length, rating, and review period?
 - **RQ4 (Methodological Rigor & Reproducibility)**: What minimal data governance and statistical verification standards are necessary to prevent invalid significance claims in e-commerce review research?
 
 ### Formal Hypotheses
 - **$H_1$ (Star-Rating Divergence)**: At least 10% of 1-star/2-star and 4-star/5-star reviews exhibit mixed or conflicting text sentiment (e.g., positive product feedback paired with negative delivery/service complaints, or sarcastic phrasing), rendering star ratings an imperfect surrogate for textual sentiment.
 - **$H_2$ (VADER Neutral Class Weakness)**: VADER will exhibit significantly lower F1 scores on the *Neutral* class ($F_1 < 0.60$) compared to *Positive* and *Negative* classes, due to lexical dictionaries favoring strong polarity tokens and struggling with descriptive, non-emotive technical feedback.
-- **$H_3$ (Confounder Dominance)**: When controlling for product category and review length using multivariate logistic regression or stratified testing, inter-platform sentiment differences will attenuate substantially, demonstrating that raw cross-platform differences are confounded by category mix.
+- **$H_3$ (Domain Composition)**: Any raw sentiment-distribution difference between the two sampled domains will change after stratifying by star rating and review length. Treat this as an exploratory within-source comparison; it cannot establish a causal marketplace effect or generalize to other categories.
 
 ---
 

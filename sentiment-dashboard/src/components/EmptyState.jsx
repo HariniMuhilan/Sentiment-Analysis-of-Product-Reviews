@@ -8,12 +8,8 @@ export function EmptyState({ type = 'no_results', query = '', onRetry }) {
         <Inbox size={48} color="#94a3b8" />
         <h3 className="empty-title">Local Review Catalog is Empty</h3>
         <p className="empty-desc">
-          No authorized product reviews have been ingested into the local database yet. 
-          Use the dataset importer or CLI to ingest authorized review data:
+          The research corpus has not been imported into the local database yet. Follow the download and import steps in Datasets/README.md. The small sample CSV is synthetic and for software checks only.
         </p>
-        <code className="code-snippet">
-          python backend/run_ingest.py --platform generic --file Datasets/sample_authorized_reviews.csv
-        </code>
         {onRetry && (
           <button type="button" className="btn-secondary flex-center" onClick={onRetry} style={{ marginTop: '1rem', gap: '0.4rem' }}>
             <RefreshCw size={14} /> Refresh Catalog
@@ -52,7 +48,7 @@ export function EmptyState({ type = 'no_results', query = '', onRetry }) {
         )}
       </p>
       <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-        Try searching for popular catalog items like <em>"Sony WH-1000XM5"</em>, <em>"Nike Air Max"</em>, or <em>"Samsung Galaxy"</em>.
+        Search a product name from the included historical Amazon corpus, such as a beauty product or household appliance.
       </p>
     </div>
   );

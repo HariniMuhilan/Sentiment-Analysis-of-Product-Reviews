@@ -73,3 +73,13 @@ The previous implementation successfully established a working full-stack web ap
 The application infrastructure is well-engineered and operational. However, the scientific and empirical claims must be downgraded to reflect actual evidence. 
 
 By implementing the corrective actions above, the repository will transition from an application claiming unverified findings into a credible research framework with reproducible methods, valid statistical tests, and transparent data governance.
+
+## 4. Status After the Local Research Corpus Was Added (2026-10-26)
+
+The project now has a local import path for the All Beauty and Appliances subsets of the Amazon Reviews 2023 corpus. This improves the empirical data volume, but does not resolve the following research requirements:
+
+- The corpus curators state that no license is assigned and that the files are provided primarily for research. Treat it as a local research copy; do not redistribute source review text or the populated database without separate permission.
+- The corpus covers Amazon only and historical records through September 2023. Cross-marketplace analysis, current price tracking, and live inventory are outside the supported evidence.
+- Star ratings are not human-annotated sentiment labels. VADER agreement with ratings is descriptive agreement, not classifier accuracy.
+- The protocol and manuscript have been re-scoped to these two domains and remain drafts. They are not formally pre-registered and contain no completed human annotation study.
+- Before paper submission, report exact imported counts and hashes from `research/data_manifest.json`, inspect duplicates/missing metadata, predefine sampling, annotate a blinded sample with at least two people, report inter-annotator agreement, and validate sentiment models against adjudicated labels.

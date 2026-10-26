@@ -12,7 +12,7 @@ export default function Header({ health, onOpenModelInfo }) {
             <BarChart3 size={24} color="#60a5fa" />
           </div>
           <div>
-            <span className="brand-title">Cross-Platform Sentiment Analytics</span>
+            <span className="brand-title">Sentiment Analysis Review</span>
             <div className="brand-subtitle">Empirical Customer Review Intelligence</div>
           </div>
         </div>
@@ -43,7 +43,7 @@ export default function Header({ health, onOpenModelInfo }) {
       <div className="header-headline">
         <h1>Sentiment Analysis Review</h1>
         <p className="header-description">
-          Evaluate customer feedback across Amazon, Flipkart, Myntra, and Meesho using genuine lexical sentiment analysis with 95% Wilson confidence intervals.
+          Explore historical Amazon product reviews from the local research corpus, with sentiment metrics computed from imported review text.
         </p>
       </div>
     </header>

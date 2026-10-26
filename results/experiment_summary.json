@@ -184,5 +184,11 @@
       "NEGATIVE": 1,
       "POSITIVE": 3
     }
+  },
+  "dataset_provenance": {
+    "status": "SYNTHETIC_SOFTWARE_FIXTURE_ONLY",
+    "sample_count": 20,
+    "research_use": "EXCLUDED_FROM_EMPIRICAL_CLAIMS",
+    "note": "These legacy metrics were computed from internal synthetic fixtures. They are not model performance estimates and must not be cited as empirical results."
   }
 }

@@ -70,7 +70,7 @@ export default function SearchBar({ onSearch, initialQuery = '' }) {
           <input
             type="text"
             className="search-input"
-            placeholder="Search ingested products (e.g. 'Sony WH-1000XM5', 'Nike Air Max', 'Samsung Galaxy')"
+            placeholder="Search a category or product (e.g. 'All Beauty', 'Appliances', 'ice maker')"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => { if (suggestions.length > 0) setShowDropdown(true); }}

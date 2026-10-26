@@ -1,21 +1,21 @@
-# Cross-Platform Sentiment Analysis of E-Commerce Product Reviews: Methodological Challenges, Domain Transferability, and Rating-Text Divergence
+# Evaluating Lexical Sentiment in Historical Amazon Product Reviews: Rating-Text Agreement, Domain Variation, and Reproducibility
 
-**Working Title**: Evaluating Lexical Sentiment Analysis in E-Commerce Product Reviews: Cross-Platform Transferability, Rating-Text Divergence, and Statistical Validity  
+**Working Title**: Evaluating Lexical Sentiment in Historical Amazon Product Reviews
 **Authors**: Harini Muhilan et al.  
 **Affiliation**: Undergraduate Research Opportunities Programme (UROP), Computer Science & Data Intelligence  
-**Document Status**: Pre-Study Manuscript Draft & Methodological Protocol (Venue-Neutral)  
+**Document Status**: Working manuscript draft; protocol not formally pre-registered (Venue-Neutral)
 **Last Updated**: October 2026  
 
 ---
 
 ## Abstract
-Cross-platform sentiment analysis of online consumer feedback is widely cited as essential for multi-marketplace market intelligence. However, empirical studies frequently suffer from three methodological shortcomings: (i) reliance on unverified star ratings as ground-truth textual sentiment, (ii) uncritical transfer of unsupervised lexical models across heterogeneous marketplace genres, and (iii) invalid statistical significance claims arising from uncalibrated comparisons across non-matched product catalogs. In this paper, we formulate a reproducible research protocol and evaluation pipeline to examine the performance of rule-based lexical sentiment classification (VADER) across major e-commerce platforms. We establish an independent double-annotated evaluation protocol, formalize baselines including Majority Class (ZeroR) and Star-Rating heuristics, and integrate rigorous two-proportion $Z$-tests and Pearson $\chi^2$ contingency tests with Holm-Bonferroni correction. We detail the legal and ethical constraints governing e-commerce review extraction, identify platform anti-scraping terms that block public redistribution of scraped marketplace corpora, and release an open, reproducible audit framework. While full cross-platform empirical findings remain bounded by ongoing data authorization agreements, our pipeline verification establishes the essential statistical safeguards required for valid consumer sentiment research.
+This working study examines lexical sentiment analysis and rating-text agreement in historical Amazon product reviews. The local research corpus contains the All Beauty and Appliances subsets of Amazon Reviews 2023, with approximately 2.8 million reviews collected between 1996 and September 2023. The application computes VADER sentiment scores and supports reproducible filtering and aggregation. Star ratings are treated as observed user scores, not human-annotated sentiment ground truth; therefore rating-text agreement is not reported as classifier accuracy. Independent human annotation and model validation remain required before drawing claims about sentiment accuracy. The corpus represents one marketplace and two selected domains, so it cannot support cross-platform comparisons, current price claims, or generalization to all products. This manuscript is a working protocol and project description; empirical results and a formal pre-registration are not yet complete.
 
 ---
 
 ## 1. Introduction and Research Question
 
-Online customer reviews directly influence e-commerce purchasing decisions, pricing strategies, and product design (Hu et al., 2006). Consumers frequently express nuanced opinions across competing marketplaces—such as Amazon, Flipkart, Myntra, and Meesho—each characterized by distinct user demographics, category specializations, rating cultures, and linguistic styles.
+Online customer reviews provide large collections of naturally occurring product feedback. This project studies a bounded historical Amazon corpus and focuses on reproducible analysis of review text, user ratings, and two product domains. The current dataset does not include authorized review data from other marketplaces.
 
 Despite the proliferation of academic papers analyzing e-commerce reviews, empirical reproducibility remains critically low. Many studies commit one or more foundational errors:
 1. **Pseudo-Ground-Truth Conflation**: Equating consumer numerical star ratings (1–5) directly with textual sentiment polarity, ignoring sarcasm, service-versus-product divergence, and rating inflation (Mudambi & Schuff, 2010).
@@ -26,7 +26,7 @@ Despite the proliferation of academic papers analyzing e-commerce reviews, empir
 To address these shortcomings, this study formulates a disciplined investigation guided by three core research questions:
 - **RQ1 (Model Accuracy vs. Ground Truth)**: How accurately does lexical sentiment classification (VADER) classify e-commerce review text into Positive, Neutral, and Negative polarities when measured against independent, double-annotated human ground truth rather than star ratings?
 - **RQ2 (Rating-Text Divergence)**: What proportion of consumer reviews exhibit divergence between star ratings and text sentiment (e.g., 5-star reviews describing defective goods, or 1-star reviews praising the product but condemning delivery), and what biases arise from using star ratings as pseudo-labels?
-- **RQ3 (Statistical Validity in Cross-Platform Comparisons)**: When comparing review distributions across marketplaces, do observed differences withstand two-sample hypothesis testing after controlling for product category and review length?
+- **RQ3 (Within-Source Domain Variation)**: How do rating-text agreement and VADER outputs differ between All Beauty and Appliances, and how are these differences associated with review length, rating, and review period?
 
 ---
 
@@ -45,25 +45,15 @@ Recent audits in natural language processing (Lilleberg et al., 2015; Rogers et 
 
 ## 3. Data Sources, Permissions, and Collection
 
-### 3.1 Eligibility Criteria & Verification Ledger
-To comply with legal frameworks and data ethics, candidate datasets were vetted against platform terms of service and academic redistribution permissions:
+### 3.1 Active Corpus and Eligibility
+The local corpus contains the **All_Beauty** and **Appliances** category subsets of Amazon Reviews 2023 curated by the McAuley Lab. The source reports approximately 701.5K and 2.1M reviews, respectively; exact locally imported counts and file hashes are recorded in `research/data_manifest.json`. Review timestamps span May 1996 through September 2023. The corpus is historical Amazon data and is not a live product or price feed.
 
-1. **Amazon Customer Reviews (AWS Open Data / UCSD SNAP)**:
-   - *Status*: Verified Authorized for Academic Research.
-   - *Terms*: AWS Public Dataset Terms & UCSD Non-commercial Research Agreement (McAuley et al., 2015).
-   - *Scope*: Millions of historical US consumer reviews with full text, helpfulness votes, and category tags.
-2. **Multilingual Amazon Reviews Corpus (MARC)**:
-   - *Status*: Verified Open Access under Creative Commons Attribution 4.0 International (**CC-BY-4.0**; Keung et al., 2020).
-   - *Scope*: Balanced 5-star reviews across multiple languages.
-3. **Flipkart, Myntra, and Meesho Datasets**:
-   - *Status*: **[BLOCKER: Unverified / Pending Platform Authorization]**.
-   - *Legal Constraint*: Inspection of primary terms of service (e.g., Flipkart Terms of Use Section 10) confirms that automated crawling, scraping, or third-party extraction of review pages is strictly prohibited. Publicly floating CSVs on Kaggle lack verified re-distribution authorizations from platform operators.
-   - *Research Policy*: In accordance with scientific integrity guidelines, this study refuses to claim empirical findings based on unauthorized platform scrapes. If verified institutional research licenses are executed by the project owner, the pipeline can ingest and evaluate them locally without violating redistribution constraints.
+The curators state that they are not in a position to assign a license and that the files are provided primarily for research. This project treats the source files and local database as a restricted research copy; no review text or populated database is included in the repository. Any future public release or publication of source text requires separate rights review. The 43-row synthetic fixture is software test data only and is excluded from empirical analyses. No authorized Flipkart, Myntra, or Meesho data is currently included, so no cross-marketplace conclusions are made.
 
 ### 3.2 Data Sanitization & Deduplication
 The ingestion pipeline enforces:
 - **PII Purging**: Stripping customer usernames, profile URLs, and contact handles.
-- **Platform-Scoped Cryptographic Deduplication**: Computing `SHA-256(platform || product_name || review_text)` to prevent duplicate reviews from inflating sample sizes.
+- **Deterministic Review IDs**: The corpus importer hashes the source product and review fields to produce stable IDs, skips duplicate IDs on repeat imports, and does not store the source's reviewer ID as a user profile field.
 - **Missing Value Preservation**: Unrated reviews strictly retain `rating = None`; silent default imputation to `3.0` is prohibited.
 
 ---
@@ -78,7 +68,7 @@ Annotators classify reviews into four mutually exclusive categories solely based
 - **MIXED / CONFLICTED**: Substantial positive statements paired with substantial negative statements (e.g., *"Stunning camera, but the battery died permanently on day two"*).
 
 ### 4.2 Inter-Annotator Reliability & Adjudication
-- **Protocol**: A minimum sample of $N = 1,000$ reviews randomly stratified by platform and star rating is independently reviewed by two trained annotators.
+- **Protocol**: A minimum sample of $N = 1,000$ reviews randomly stratified by domain and star rating is independently reviewed by two trained annotators.
 - **Reliability Metric**: Measured via Cohen's Kappa ($\kappa$):
   $$\kappa = \frac{p_o - p_e}{1 - p_e}$$
 - **Disagreement Resolution**: Annotations with $\kappa$-disagreement are submitted to an independent third senior adjudicator for final ground-truth assignment.
@@ -105,15 +95,17 @@ Annotators classify reviews into four mutually exclusive categories solely based
 
 ## 6. Experimental Design and Statistical Analysis
 
-### 6.1 Two-Sample Hypothesis Testing
-To compare positive review proportions between platforms without ecological fallacy:
+### 6.1 Domain Comparison and Dependence
+Comparisons between the two selected domains are exploratory and observational. Reviews are clustered within products and may also share reviewers; analyses must account for that dependence (for example, product-clustered bootstrap intervals) and report unadjusted counts and effect sizes. A naïve review-level $Z$-test or $χ^2$ test must not be treated as decisive evidence when its independence assumption is violated.
+
+If a two-proportion test is reported as a supplementary descriptive statistic:
 - We compute the **Two-Proportion $Z$-Test**:
   $$z = \frac{p_1 - p_2}{\sqrt{\hat{p}(1-\hat{p}) \left(\frac{1}{n_1} + \frac{1}{n_2}\right)}}$$
-- **Holm-Bonferroni Correction**: Applied to control family-wise error rate across multiple pairwise platform comparisons.
+- **Holm-Bonferroni Correction**: Applied if multiple domain or time-period contrasts are tested.
 - **Effect Size**: Quantified using Cohen's $h = 2\arcsin(\sqrt{p_1}) - 2\arcsin(\sqrt{p_2})$.
 
 ### 6.2 Contingency Analysis
-For overall sentiment distribution comparison ($3 \times 2$ table), we compute Pearson's $\chi^2$ Test of Independence and report Cramér's $V$:
+For an exploratory overall sentiment distribution comparison between the two domains ($3 \times 2$ table), Pearson's $\chi^2$ Test of Independence and Cramér's $V$ may be reported alongside product-clustered uncertainty estimates:
 $$V = \sqrt{\frac{\chi^2}{N(k-1)}}$$
 
 ---
@@ -121,28 +113,18 @@ $$V = \sqrt{\frac{\chi^2}{N(k-1)}}$$
 ## 7. Results
 
 > **Scientific Transparency Notice**:  
-> In compliance with the pre-registered protocol, empirical results are NOT fabricated or derived from unverified Kaggle dumps. Below we report verified pipeline validation metrics alongside explicit `[TODO]` placeholders for metrics awaiting the full authorized research corpus.
+> The corpus is available locally, but no independently human-annotated benchmark has been completed. Accuracy, F1, and calibration results are therefore not reported. Existing results under `results/` are legacy synthetic fixture outputs and are excluded from empirical claims.
 
-### 7.1 Baseline Comparison
-*Table 1: Performance comparison across baselines on the verification suite.*
-
-| Model / Baseline | Accuracy | Macro $F_1$ | Pos $F_1$ | Neu $F_1$ | Neg $F_1$ | ECE |
-|---|---|---|---|---|---|---|
-| Majority Class (ZeroR) | 0.4000 | 0.1905 | 0.5714 | 0.0000 | 0.0000 | N/A |
-| Star-Rating Heuristic | 0.8500 | 0.8148 | 0.8889 | 0.6667 | 0.8889 | N/A |
-| VADER Lexicon (v1.0.0) | 0.7000 | 0.6656 | 0.7778 | 0.4444 | 0.7778 | 0.1036 |
-| *Supervised RoBERTa* | *[TODO: Pending]* | *[TODO: Pending]* | *[TODO: Pending]* | *[TODO: Pending]* | *[TODO: Pending]* | *[TODO: Pending]* |
+### 7.1 Human-Labeled Model Evaluation
+**Pending.** Create and independently adjudicate a blinded annotation sample before computing accuracy, class-wise F1, or ECE. The source star rating must not be substituted for the human sentiment label.
 
 ### 7.2 Rating-Text Divergence Analysis
-- Total Rated Reviews Audited: `[TODO: Pending full corpus ingestion]`
-- Overall Divergence Rate: `[TODO: Pending full corpus ingestion]`
-- High Rating (4–5★) paired with Negative Text: `[TODO: Pending full corpus ingestion]`
-- Low Rating (1–2★) paired with Positive Text: `[TODO: Pending full corpus ingestion]`
+- Total rated reviews audited: `[Pending descriptive analysis of the imported corpus]`
+- Rating-text agreement/divergence: `[Pending; describe as agreement with a rating heuristic, not sentiment accuracy]`
 
-### 7.3 Cross-Platform Statistical Comparison
-- Platform A vs Platform B $Z$-statistic: `[TODO: Blocked until verified platform datasets are ingested]`
-- Pearson $\chi^2$ test of independence: `[TODO: Blocked until verified platform datasets are ingested]`
-- Effect size (Cohen's $h$ / Cramér's $V$): `[TODO: Blocked until verified platform datasets are ingested]`
+### 7.3 Within-Source Domain Comparison
+- All Beauty vs Appliances sentiment and rating distributions: `[Pending descriptive analysis, product-clustered uncertainty estimates, and multiple-comparison plan]`
+- No cross-platform test is supported by the current data.
 
 ---
 
@@ -157,9 +139,9 @@ Preliminary inspection of rule-based classification errors reveals three recurri
 
 ## 9. Limitations, Ethics, and Data Statement
 
-1. **Language Scope**: VADER is strictly calibrated on English tokens. Reviews code-mixed with Hindi, Tamil, or Hinglish (common on Indian e-commerce platforms) cannot be accurately analyzed with English lexicons.
-2. **Confounder Limitation**: Cross-platform comparisons are inherently observational. Without paired identical ASIN/SKU products sold simultaneously on all platforms, platform differences cannot be causally separated from seller/catalog differences.
-3. **Ethics Statement**: No private user data was scraped or decompiled. Research was conducted using synthetic test fixtures and authorized open benchmarks.
+1. **Language and Marketplace Scope**: VADER is an English lexical model. The active corpus is historical Amazon data and does not represent Indian marketplaces or code-mixed Hindi, Tamil, or Hinglish reviews.
+2. **Domain Confounding**: The two categories differ in product mix and review behavior. Observed category differences are descriptive and cannot be attributed to category alone without further controls and a sampling design.
+3. **Data Statement**: The active corpus is historical Amazon Reviews 2023 data provided by the McAuley Lab primarily for research; its curators assign no license. Review text and the populated database remain local and are not redistributed. The synthetic fixture is excluded from empirical analyses.
 
 ---
 
@@ -173,7 +155,8 @@ This project delivers a disciplined, reproducible framework for evaluating senti
 
 When preparing this manuscript for conference or journal submission (e.g., *ACM Transactions on the Web*, *EMNLP Industrial/Empirical Track*, or *IEEE Transactions on Computational Social Systems*), the following checklist must be completed:
 
-- [ ] Execute formal research data agreements for non-Amazon marketplace data (Flipkart, Myntra, Meesho) or re-scope paper exclusively to multi-national Amazon open benchmarks (MARC).
+- [ ] Confirm institutional and source terms for the local Amazon Reviews 2023 research copy and obtain separate permission before redistributing any source text.
+- [ ] Complete descriptive analysis with exact manifest counts, data-quality checks, product-clustered uncertainty estimates, and a pre-specified analysis plan.
 - [ ] Complete double-annotation on $N \ge 1,000$ reviews and report inter-annotator agreement ($\kappa$).
 - [ ] Train a supervised transformer baseline (e.g., `roberta-base` or `indic-bert` for multilingual code-mixing).
 - [ ] Format LaTeX manuscript using the target venue's official document template (e.g., `acmart.cls` or `acl_natbib.sty`).

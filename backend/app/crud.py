@@ -98,10 +98,18 @@ def build_review_filter(
     clauses = []
     if query and query.strip():
         term = f"%{query.strip()}%"
+        category_term = f"%{query.strip().replace(' ', '_')}%"
+        matching_products = db.query(Product.id).filter(or_(
+            Product.name.ilike(term),
+            Product.category.ilike(term),
+            Product.category.ilike(category_term),
+        ))
         clauses.append(or_(
-            Review.product_name.ilike(term),
-            Review.headline.ilike(term),
-            Review.review_text.ilike(term)
+            Review.product_id.in_(matching_products),
+            and_(
+                Review.product_id.is_(None),
+                or_(Review.product_name.ilike(term), Review.category.ilike(term), Review.category.ilike(category_term)),
+            ),
         ))
     if platform_code and platform_code.lower() != "all":
         p = db.query(Platform).filter(Platform.code == platform_code.lower()).first()
@@ -125,33 +133,42 @@ def build_review_filter(
     return and_(*clauses) if clauses else True
 
 def get_product_search(db: Session, query: Optional[str] = None, limit: int = 20) -> List[Dict[str, Any]]:
+    review_count = func.count(Review.id)
     stmt = db.query(
-        Review.product_name,
-        Review.category,
-        func.count(Review.id).label("total_reviews"),
+        Product.id,
+        Product.name,
+        Product.category,
+        review_count.label("total_reviews"),
         func.avg(Review.rating).label("avg_rating")
-    )
+    ).outerjoin(Review, Review.product_id == Product.id)
     if query and query.strip():
-        stmt = stmt.filter(Review.product_name.ilike(f"%{query.strip()}%"))
+        term = f"%{query.strip()}%"
+        category_term = f"%{query.strip().replace(' ', '_')}%"
+        stmt = stmt.filter(or_(Product.name.ilike(term), Product.category.ilike(term), Product.category.ilike(category_term)))
     
-    stmt = stmt.group_by(Review.product_name, Review.category).order_by(func.count(Review.id).desc()).limit(limit)
+    stmt = stmt.group_by(Product.id, Product.name, Product.category).order_by(review_count.desc()).limit(limit)
     rows = stmt.all()
 
-    results = []
-    for idx, (p_name, cat, rev_count, avg_r) in enumerate(rows):
-        # find platforms for this product
-        platforms = db.query(Platform.name).join(Review, Review.platform_id == Platform.id)\
-            .filter(Review.product_name == p_name).distinct().all()
-        plat_names = [p[0] for p in platforms]
-        results.append({
+    product_ids = [row.id for row in rows]
+    platforms_by_product: Dict[int, set[str]] = {product_id: set() for product_id in product_ids}
+    if product_ids:
+        platform_rows = db.query(Review.product_id, Platform.name).join(
+            Platform, Review.platform_id == Platform.id
+        ).filter(Review.product_id.in_(product_ids)).distinct().all()
+        for product_id, platform_name in platform_rows:
+            platforms_by_product[product_id].add(platform_name)
+
+    return [
+        {
             "id": idx + 1,
-            "name": p_name,
-            "category": cat or "General",
-            "total_reviews": rev_count,
-            "average_rating": round(float(avg_r), 2) if avg_r else None,
-            "platforms": plat_names
-        })
-    return results
+            "name": row.name,
+            "category": row.category or "General",
+            "total_reviews": row.total_reviews,
+            "average_rating": round(float(row.avg_rating), 2) if row.avg_rating else None,
+            "platforms": sorted(platforms_by_product[row.id]),
+        }
+        for idx, row in enumerate(rows)
+    ]
 
 def get_aggregated_analysis(
     db: Session,

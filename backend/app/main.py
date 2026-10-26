@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="Cross-Platform E-Commerce Sentiment Analysis API with Real NLP Pipeline & Statistical Metrics",
+    description="Product review sentiment analysis API for locally ingested research datasets",
     lifespan=lifespan
 )
 

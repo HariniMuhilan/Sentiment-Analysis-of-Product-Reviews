@@ -1,74 +1,84 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "project": "Sentiment Analysis of Product Reviews",
-  "manifest_version": "1.0.0",
-  "generated_at": "2026-10-26T11:18:00Z",
+  "project": "Sentiment Analysis Review",
+  "manifest_version": "2.0.0",
+  "generated_at": "2026-10-26T14:22:47.600964+00:00",
+  "local_research_database": {
+    "path": "backend/sentiment_research.db",
+    "review_count": 2797473,
+    "product_count": 206896,
+    "source_platform": "amazon_ucsd_2023",
+    "excluded_from_git": true
+  },
   "datasets": [
     {
-      "id": "DEMO-FIXTURE-43",
-      "name": "Synthetic Demonstration Dataset",
-      "relative_path": "Datasets/sample_authorized_reviews.csv",
-      "sha256": "9ff8ffdc091a2af0e7d11796ccb6787ad8c4850c7f38cc04f384fc4b9f678edc",
-      "type": "synthetic_demo",
-      "purpose": "Unit testing, system integration, UI rendering validation",
-      "verified_license": "CC0-1.0 (Public Domain Dedication)",
-      "empirical_status": "EXCLUDED_FROM_EMPIRICAL_STUDY",
-      "record_count": 43,
-      "columns": [
-        "external_id",
-        "platform",
-        "product_name",
-        "category",
-        "rating",
-        "headline",
-        "review_text",
-        "review_date",
-        "helpful_votes"
+      "id": "AMAZON-REVIEWS-2023-ALL-BEAUTY",
+      "name": "Amazon Reviews 2023 — All Beauty",
+      "type": "research_corpus_category",
+      "provider": "McAuley Lab, UC San Diego",
+      "source_url": "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023",
+      "local_files_ignored_by_git": true,
+      "source_rows": 701528,
+      "imported_unique_review_rows": 693547,
+      "duplicate_rows_skipped": 7981,
+      "product_count": 112578,
+      "review_date_range_utc": {
+        "start": "2000-11-01 04:24:18.000000",
+        "end": "2023-09-09 00:39:36.666000"
+      },
+      "sha256": {
+        "reviews_jsonl": "36ca7c48440a8247b2dca0174d095238422b506a8a80c114dca722b7715f1c94",
+        "item_metadata_jsonl": "1cfbdf6d2ccf9c3ac52a4508b15f31f8f340508a245b65c3e3b5f461e06e97ef"
+      },
+      "rights_status": "No license assigned by dataset curators; they say the corpus is made available primarily for research.",
+      "use_policy": "Local research use only. Do not redistribute raw review text or the populated database without separate permission.",
+      "limitations": [
+        "Historical Amazon data through September 2023; not live reviews or inventory.",
+        "Not current retailer prices.",
+        "Single marketplace; no cross-platform claims.",
+        "Ratings are not human-annotated sentiment labels."
       ]
     },
     {
-      "id": "AMAZON-MARC-EN",
-      "name": "Multilingual Amazon Reviews Corpus (English Subset)",
-      "relative_path": "Datasets/research/amazon_marc_en_sample.jsonl",
-      "type": "research_benchmark",
-      "purpose": "Empirical baseline validation and rating-text divergence evaluation",
-      "provider": "Amazon Science (Keung et al., 2020)",
-      "verified_license": "CC-BY-4.0",
-      "empirical_status": "VERIFIED_ACADEMIC_CORPUS",
-      "source_url": "https://huggingface.co/datasets/amazon_reviews_multi"
+      "id": "AMAZON-REVIEWS-2023-APPLIANCES",
+      "name": "Amazon Reviews 2023 — Appliances",
+      "type": "research_corpus_category",
+      "provider": "McAuley Lab, UC San Diego",
+      "source_url": "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023",
+      "local_files_ignored_by_git": true,
+      "source_rows": 2128605,
+      "imported_unique_review_rows": 2103926,
+      "duplicate_rows_skipped": 24679,
+      "product_count": 94318,
+      "review_date_range_utc": {
+        "start": "2000-10-23 14:37:23.000000",
+        "end": "2023-09-12 16:29:17.016000"
+      },
+      "sha256": {
+        "reviews_jsonl": "d9dd03aa9be0c8e6fea66d8ce99a7e5b359e272d6323186c1aa80f6d36af1dab",
+        "item_metadata_jsonl": "b25ae892af7bc452c4a54b7e4fee52f4c3e9adf058768ca3cb07ecb8d328b41e"
+      },
+      "rights_status": "No license assigned by dataset curators; they say the corpus is made available primarily for research.",
+      "use_policy": "Local research use only. Do not redistribute raw review text or the populated database without separate permission.",
+      "limitations": [
+        "Historical Amazon data through September 2023; not live reviews or inventory.",
+        "Not current retailer prices.",
+        "Single marketplace; no cross-platform claims.",
+        "Ratings are not human-annotated sentiment labels."
+      ]
     },
     {
-      "id": "FLIPKART-RESEARCH-PENDING",
-      "name": "Flipkart Product Customer Reviews",
-      "relative_path": "Datasets/Flipkart/",
-      "type": "external_marketplace",
-      "purpose": "Cross-platform comparative sentiment study",
-      "provider": "Flipkart Internet Pvt. Ltd.",
-      "verified_license": "NONE_VERIFIED",
-      "empirical_status": "BLOCKED_PENDING_PLATFORM_AUTHORIZATION",
-      "blocker_reason": "Automated web scraping is prohibited under Flipkart Terms of Use (Section 10). Public Kaggle uploads lack authorized redistribution rights."
-    },
-    {
-      "id": "MYNTRA-RESEARCH-PENDING",
-      "name": "Myntra Fashion Reviews",
-      "relative_path": "Datasets/Myntra/",
-      "type": "external_marketplace",
-      "purpose": "Fashion/Apparel domain sentiment analysis",
-      "provider": "Myntra Designs Pvt. Ltd.",
-      "verified_license": "NONE_VERIFIED",
-      "empirical_status": "BLOCKED_PENDING_PLATFORM_AUTHORIZATION",
-      "blocker_reason": "Myntra Terms of Service prohibit third-party crawling. Awaiting institutional data agreement."
-    },
-    {
-      "id": "MEESHO-RESEARCH-PENDING",
-      "name": "Meesho Product Reviews",
-      "relative_path": "Datasets/Meesho/",
-      "type": "external_marketplace",
-      "purpose": "Social commerce customer sentiment evaluation",
-      "provider": "Fashnear Technologies Pvt. Ltd.",
-      "verified_license": "NONE_VERIFIED",
-      "empirical_status": "BLOCKED_PENDING_PLATFORM_AUTHORIZATION",
-      "blocker_reason": "No public open access license available. Awaiting verified platform access."
+      "id": "DEMO-FIXTURE-43",
+      "name": "Synthetic Demonstration Fixture",
+      "relative_path": "Datasets/sample_authorized_reviews.csv",
+      "type": "synthetic_demo",
+      "sha256": "d3db4d3c47ba7a04f8a2939c19e345ffcde3424e29316c26a9cc5fed1157e71f",
+      "record_count": 43,
+      "empirical_status": "EXCLUDED_FROM_EMPIRICAL_STUDY",
+      "purpose": "Software tests and UI smoke demonstration only; not customer data and not empirical evidence."
     }
+  ],
+  "not_included": [
+    "No authorized Flipkart, Myntra, or Meesho review corpus is included.",
+    "Amazon Reviews 2023 files and this derived database are not committed to the repository."
   ]
 }

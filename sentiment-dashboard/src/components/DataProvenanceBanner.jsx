@@ -12,7 +12,7 @@ export default function DataProvenanceBanner() {
           <div>
             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Data Integrity, Licensing & Compliance Notice</span>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              All analysis is performed strictly on locally authorized datasets. Live marketplace scraping is prohibited.
+              The research database contains historical Amazon reviews; it is not live inventory or cross-platform data.
             </div>
           </div>
         </div>
@@ -31,33 +31,27 @@ export default function DataProvenanceBanner() {
         <div className="provenance-details animate-fade-in">
           <div className="provenance-grid">
             <div className="provenance-item">
-              <h4>Amazon Reviews</h4>
-              <p>Amazon Customer Reviews Dataset (US TSV format), made available for academic & research exploration under the AWS Open Data Program.</p>
-              <span className="provenance-meta">License: Non-commercial educational research only.</span>
+              <h4>Amazon Reviews 2023 (UCSD McAuley Lab)</h4>
+              <p>Local research copy of the All Beauty and Appliances category review and item metadata files. Source reviews are historical (collection through September 2023).</p>
+              <span className="provenance-meta">Research use: the curators assign no license and say the files are provided primarily for research. Do not redistribute review text.</span>
             </div>
 
             <div className="provenance-item">
-              <h4>Flipkart Reviews</h4>
-              <p>Curated product review sentiment collection (Dataset-SA.csv) containing verified consumer ratings and summaries.</p>
-              <span className="provenance-meta">License: Open research benchmarking. Original content terms apply.</span>
+              <h4>Coverage and freshness</h4>
+              <p>This corpus represents one marketplace. It does not provide live offers, current stock, current prices, or reviews from Flipkart, Myntra, or Meesho.</p>
+              <span className="provenance-meta">Use available prices only if independently verified as current; this corpus's metadata prices may be missing or historical.</span>
             </div>
 
             <div className="provenance-item">
-              <h4>Myntra Fashion Reviews</h4>
-              <p>Specialized apparel and footwear feedback corpus. Personal customer identifiers have been irreversibly redacted.</p>
-              <span className="provenance-meta">License: Academic sentiment evaluation and sizing analytics.</span>
-            </div>
-
-            <div className="provenance-item">
-              <h4>Meesho Product Reviews</h4>
-              <p>Social commerce review corpus focusing on customer sentiment and value satisfaction in home and apparel categories.</p>
-              <span className="provenance-meta">License: Educational evaluation. Anonymized textual records.</span>
+              <h4>Research fixture</h4>
+              <p>The 43-row sample CSV contains synthetic records for testing only and is kept separate from the empirical research database.</p>
+              <span className="provenance-meta">Do not use the fixture as real customer feedback or empirical evidence.</span>
             </div>
           </div>
 
           <div className="provenance-footer flex-between" style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            <span>Privacy Note: Direct PII (customer names, emails, addresses) is purged at ingestion.</span>
-            <span>Refer to <code>Datasets/README.md</code> for dataset acquisition and documentation.</span>
+            <span>Research database: <code>backend/sentiment_research.db</code> (local, ignored by Git).</span>
+            <span>See <code>research/data_sources.md</code> for limitations and citation details.</span>
           </div>
         </div>
       )}

@@ -1,45 +1,39 @@
-# Research Data Source Register & Legal Rights Analysis
+# Research Data Sources and Usage Boundaries
 
-This document provides a transparent, authoritative accounting of all data sources considered or processed within this project, in accordance with scientific ethics and platform terms of service.
+## Active corpus
 
----
+The local research database uses two category subsets from the Amazon Reviews 2023 corpus curated by the McAuley Lab at UC San Diego:
 
-## 1. Candidate Dataset Ledger
+| Corpus subset | Source page | Source rows | Imported unique reviews | Domain |
+|---|---|---:|---:|---|
+| All_Beauty | [Dataset files](https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023) | 701,528 | 693,547 | Beauty and personal care |
+| Appliances | [Dataset files](https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023) | 2,128,605 | 2,103,926 | Household appliances |
 
-| Source Identifier | Primary Provider & Source URL | License & Terms | Verification Status | Allowed Usages | Collection Limitations |
-|---|---|---|---|---|---|
-| **AMAZON-UCSD-SNAP** | Prof. Julian McAuley (UC San Diego) & Stanford SNAP. [UCSD Amazon Data](https://cseweb.ucsd.edu/~jmcauley/datasets.html#amazon_reviews) | Academic & Non-commercial Research Use. | **Verified Authorized** | Local academic evaluation, model benchmarking. No public re-hosting of raw dumps. | Historical data (1995–2014 / 2018). Star ratings (1-5) and text present. |
-| **AMAZON-AWS-PDS** | Amazon Web Services Customer Reviews Public Dataset. [AWS Registry](https://registry.opendata.aws/amazon-reviews/) | AWS Customer Reviews Public Dataset Terms. Academic non-commercial exploration. | **Verified Authorized** | Local academic evaluation. Access via AWS S3 requester-pays or direct mirror. | English US marketplace reviews. High volume (>130M reviews). |
-| **AMAZON-MARC** | Amazon Science (Keung et al., 2020). [HuggingFace MARC](https://huggingface.co/datasets/amazon_reviews_multi) | Creative Commons Attribution 4.0 International (**CC-BY-4.0**). | **Verified Open Access** | Full research use, reproducible benchmarking, public derivative release with attribution. | Balanced 5-star ratings; translated / multilingual subsets. |
-| **FLIPKART-KAGGLE-COMM** | Community upload on Kaggle (`Dataset-SA.csv`). | Marked CC0 / DbCL by uploader, but **lacks authorization** from Flipkart Internet Pvt. Ltd. | ⚠️ **Unverified / Blocked** | **Blocked from public redistribution**. Flipkart Terms of Use explicitly prohibit automated scraping. | Scraped corpus of uncertain provenance, unverified dates, potential duplicate leakage. |
-| **MYNTRA-KAGGLE-COMM** | Community scraping upload on Kaggle. | Uploader license claims unverified. Lacks authorization from Myntra Designs Pvt. Ltd. | ⚠️ **Unverified / Blocked** | **Blocked from public redistribution**. Myntra Terms of Service prohibit site crawling. | Highly skewed towards specific fashion brands; lack verified timestamp coverage. |
-| **MEESHO-KAGGLE-COMM** | Community web scrape on Kaggle. | Lacks authorization from Fashnear Technologies Pvt. Ltd. | ⚠️ **Unverified / Blocked** | **Blocked from public redistribution**. | Small scraped sample; potential fake review spam in raw records. |
-| **DEMO-FIXTURE-43** | `Datasets/sample_authorized_reviews.csv` | Synthetic test fixture created for system testing. Dedicated to Public Domain (**CC0**). | **Verified Demo Data** | Functional testing, software CI, UI demonstration. | **Zero empirical value**. Synthetic text; cannot be cited as real-world evidence. |
+The importer skipped 33,660 repeated rows, for 2,797,473 unique reviews total. Exact source-file hashes are in `research/data_manifest.json`.
 
----
+The dataset spans May 1996 to September 2023. It contains Amazon review text, ratings, product identifiers, timestamps, and separate item metadata. It is historical research data, not a live product catalog or price feed.
 
-## 2. Platform Legal & Terms Analysis
+### Rights and distribution
 
-### Flipkart Terms of Service (Section 10: Use of the Website)
-> *"You shall not use any 'deep-link', 'page-scrape', 'robot', 'spider' or other automatic device, program, algorithm or methodology ... to access, acquire, copy or monitor any portion of the Website or any Content..."*
+The dataset curators state that they are not in a position to assign a license and that the files are made available primarily for research. This project therefore treats the corpus as a local research copy only. The raw source files and derived database containing review text must not be committed, pushed, or redistributed without permission and a separate rights review. A paper should cite the dataset paper and source, report access date and subset, and follow the source terms and institutional guidance.
 
-**Scientific Conclusion**: Web-scraped Flipkart datasets from Kaggle cannot be certified as legally authorized for redistribution. To maintain academic and legal integrity, this research project:
-1. Does **not** include or scrape proprietary Flipkart records.
-2. Formulates its ingestion pipeline as a generic interface: if an operator holds a direct research agreement with Flipkart or an authorized institutional data sharing license, the pipeline can process it locally.
-3. Does **not** claim empirical conclusions regarding Flipkart customer sentiment without verified data authorization.
+The repository's `.gitignore` excludes downloaded JSONL files and SQLite databases. The data manifest records the local import counts and file hashes, but does not include review text.
 
-### Myntra & Meesho Terms of Service
-Similar anti-scraping and data extraction clauses govern `myntra.com` and `meesho.com`. Public Kaggle dumps derived from unauthorized scraping cannot serve as the empirical foundation for peer-reviewed claims without explicit permissions.
+## Excluded datasets
 
----
+- `Datasets/sample_authorized_reviews.csv` is a 43-row synthetic fixture for software tests and UI demonstration. It is excluded from the empirical research database.
+- Community datasets claiming Flipkart, Myntra, or Meesho reviews are excluded unless provenance, authorization, and redistribution/use rights are independently verified. The project currently makes no empirical claims about those platforms.
+- The Amazon Reviews Multi/MARC corpus is not included in the current database. Dataset mirrors carry inconsistent license metadata; do not describe it as CC-BY-4.0 without authoritative confirmation.
 
-## 3. Study Data Strategy & Operator Prerequisites
+## Research limitations
 
-To execute the research protocol with full legal and scientific validity:
+- The active data is from one marketplace, so it cannot support cross-platform comparisons.
+- Category subsets are not representative probability samples of all customers or products. They inherit the original collection and curation biases.
+- Source ratings are observed labels, not human-annotated sentiment ground truth. Analyses of VADER agreement with ratings must be described as rating-text agreement, not validated sentiment accuracy.
+- Products are matched to source metadata by parent ASIN. Missing metadata is retained as an explicit fallback product name and should be counted in quality checks.
+- Prices in source metadata are missing for many products and may be historical. The app must not treat them as current offers.
+- The source dataset ends in September 2023. Do not call the imported reviews live or continuously updated.
 
-1. **Phase 1 (Current State - Methods & System Protocol)**:
-   - The repository implements the complete research pipeline, ingestion parsers, baseline models, annotation protocol, and statistical testing framework.
-   - Evaluated on verified open academic data (MARC / UCSD Amazon samples) and demo fixtures for test verification.
-2. **Phase 2 (Operator Prerequisites for Cross-Platform Empirical Run)**:
-   - The project owner must secure written research authorization or an institutional API license from Indian e-commerce marketplaces (Flipkart, Myntra, Meesho) before publishing comparative empirical findings.
-   - Alternatively, the study must scope its empirical evaluation to verified open e-commerce corpora (e.g., MARC multilingual Amazon reviews across countries) where licenses permit reproducible analysis.
+## Citation
+
+Hou, Y., Li, J., He, Z., Yan, A., Chen, X., and McAuley, J. (2024). *Bridging Language and Items for Retrieval and Recommendation*. arXiv:2403.03952. Dataset: [Amazon Reviews 2023](https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023).

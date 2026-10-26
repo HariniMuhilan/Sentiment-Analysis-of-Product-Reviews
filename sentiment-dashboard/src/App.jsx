@@ -194,7 +194,7 @@ function App() {
               {/* Summary Metrics */}
               <SummaryCards analysis={analysis} />
 
-              {/* Cross-Platform Comparison */}
+              {/* Source-level coverage and sentiment */}
               <PlatformComparison 
                 analysis={analysis} 
                 platforms={platforms} 
@@ -222,9 +222,9 @@ function App() {
         {/* Footer */}
         <footer className="footer-container flex-between" role="contentinfo">
           <div>
-            <span>Sentiment Analysis of Product Reviews &copy; {new Date().getFullYear()}</span>
+            <span>Sentiment Analysis Review &copy; {new Date().getFullYear()}</span>
             <span style={{ margin: '0 0.5rem' }}>•</span>
-            <span>UROP Cross-Platform Intelligence Framework</span>
+            <span>Amazon Reviews 2023 Research Corpus</span>
           </div>
           <div>
             <span>Engine: VADER Lexicon NLP v1.0.0</span>

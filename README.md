@@ -1,4 +1,4 @@
-# Sentiment Analysis of Product Reviews
+# Sentiment Analysis Review
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19.2-61DAFB.svg?logo=react&logoColor=black)](https://react.dev/)
@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg?logo=python&logoColor=white)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An end-to-end, cross-platform product review sentiment analysis system and reproducible research framework for evaluating customer feedback across **Amazon**, **Flipkart**, **Myntra**, and **Meesho**. Powered by a real Python FastAPI backend, rule-based NLP pipeline (VADER), statistical hypothesis testing (Two-Proportion Z-Test & Pearson $\chi^2$), and a modern React 19 analytics dashboard.
+An end-to-end product review sentiment analysis application and reproducible research framework. The current empirical corpus contains historical Amazon reviews from the UCSD McAuley Lab Amazon Reviews 2023 dataset in the All Beauty and Appliances categories. It uses a Python FastAPI backend, a VADER sentiment pipeline, and a React analytics dashboard. The current corpus does not support cross-marketplace claims or live price comparisons.
 
 ---
 
@@ -102,13 +102,13 @@ pip install -r requirements.txt
 # Pre-download VADER lexicon
 python -c "import nltk; nltk.download('vader_lexicon')"
 
-# Ingest sample authorized dataset into local SQLite database
-python run_ingest.py --platform generic --file ../Datasets/sample_authorized_reviews.csv
+# Import the local research copy (download instructions: ../Datasets/README.md)
+python ingest_ucsd_amazon_2023.py --categories All_Beauty Appliances
 
 # Launch the FastAPI backend server
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
-The backend API is now running at `http://127.0.0.1:8000`. Interactive documentation is available at `http://127.0.0.1:8000/docs`.
+The backend API is now running at `http://127.0.0.1:8000`. Interactive documentation is available at `http://127.0.0.1:8000/docs`. The research database is stored in `backend/sentiment_research.db` and is excluded from Git.
 
 ### 2. Set Up Frontend Dashboard
 In a new terminal:
@@ -126,26 +126,9 @@ Open `http://localhost:5173` in your browser.
 
 ---
 
-## 📥 Ingesting Custom Datasets
+## 📥 Research Data and Additional Imports
 
-The repository includes a reproducible ingestion CLI capable of parsing, validating, deduplicating, and analyzing dataset files:
-
-```bash
-# Ingest Amazon Customer Reviews TSV
-python backend/run_ingest.py --platform amazon --file path/to/amazon_reviews.tsv
-
-# Ingest Flipkart CSV
-python backend/run_ingest.py --platform flipkart --file path/to/flipkart_reviews.csv
-
-# Ingest Myntra CSV
-python backend/run_ingest.py --platform myntra --file path/to/myntra_reviews.csv
-
-# Ingest Meesho CSV
-python backend/run_ingest.py --platform meesho --file path/to/meesho_reviews.csv
-
-# Ingest unified multi-platform CSV
-python backend/run_ingest.py --platform generic --file Datasets/sample_authorized_reviews.csv
-```
+The local research corpus, its source limitations, download steps, and importer are documented in [`Datasets/README.md`](Datasets/README.md). The project does not bundle review text in Git. Only import additional collections after verifying source rights and research permissions. The generic CSV/TSV importer is available for a rights-cleared local file; the synthetic fixture is for software checks only and must not be mixed into empirical analysis.
 
 ---
 
@@ -155,7 +138,7 @@ python backend/run_ingest.py --platform generic --file Datasets/sample_authorize
 ```bash
 python research/run_experiments.py
 ```
-Executes baseline models (Majority Class ZeroR, Star-Rating Heuristic, VADER Lexicon), measures Expected Calibration Error (ECE), evaluates rating-text divergence, and generates machine-readable summary tables in `results/`.
+Requires `Datasets/research/benchmark_annotated.csv` with independently adjudicated labels before producing accuracy, F1, or calibration results. It intentionally stops if no valid human-labeled benchmark exists. Star ratings are not ground-truth sentiment labels. The old 20-row synthetic fixture output in `results/` is marked and excluded from research claims.
 
 ### 2. Backend Unit & Integration Tests (26 Tests)
 ```bash
@@ -215,10 +198,10 @@ docker compose up --build -d
 ## 📋 Operator Prerequisites for Public Deployment
 
 Before deploying this application to a public server or cloud provider:
-1. **Dataset Authorization**: Confirm that you have obtained research data licenses or permission for all imported review collections. Refer to [`Datasets/README.md`](Datasets/README.md).
+1. **Dataset rights**: Review the corpus curator's statement and applicable data terms before any public deployment or redistribution. The research copy is local and is not cleared for public data hosting; see [`research/data_sources.md`](research/data_sources.md).
 2. **Reverse Proxy & TLS**: Ensure an SSL/TLS certificate (e.g., Let's Encrypt / Certbot) terminates HTTPS traffic before reaching Nginx.
 3. **Environment Settings**: Set `ENVIRONMENT=production`, adjust `CORS_ORIGINS` to your public domain name, and configure `DATABASE_URL` (PostgreSQL recommended for high-concurrency production).
-4. **Data Backups**: Establish a regular backup schedule for the database (`sentiment.db` or PostgreSQL volume).
+4. **Data Backups**: Establish a regular backup schedule for the local research database or PostgreSQL volume. Do not publish a backup containing source review text.
 
 ---
 

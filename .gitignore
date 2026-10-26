@@ -3,8 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.db
+*.db-*
 *.sqlite
 *.sqlite3
+*.sqlite-*
 .pytest_cache/
 venv/
 .venv/
@@ -29,6 +31,7 @@ Datasets/**/*.zip
 Datasets/**/*.gz
 Datasets/**/*.parquet
 Datasets/**/*.json
+Datasets/**/*.jsonl
 Datasets/**/*.tar
 Datasets/Amazon/
 Datasets/Flipkart/

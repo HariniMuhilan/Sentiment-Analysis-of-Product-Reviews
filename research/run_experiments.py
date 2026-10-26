@@ -176,15 +176,24 @@ def run_experiment_pipeline(records: List[Dict[str, Any]]) -> Dict[str, Any]:
     return summary
 
 if __name__ == "__main__":
-    # If a benchmark file is provided via arg, run on it; otherwise run on internal test fixtures
+    # Empirical metrics require an independently human-annotated benchmark.
     bench_file = REPO_ROOT / "Datasets" / "research" / "benchmark_annotated.csv"
-    if bench_file.exists():
-        print(f"Loading empirical benchmark: {bench_file}")
-        recs = load_evaluation_dataset(bench_file)
-    else:
-        from app.api.evaluation import UNIT_TEST_FIXTURES
-        print("Notice: No external benchmark file found. Executing verification on internal test fixtures...")
-        recs = UNIT_TEST_FIXTURES
+    if not bench_file.exists():
+        raise SystemExit(
+            "No human-annotated benchmark found. Create Datasets/research/benchmark_annotated.csv "
+            "using the annotation protocol before reporting accuracy, F1, or calibration results. "
+            "Synthetic unit-test fixtures are not research evidence."
+        )
+
+    print(f"Loading human-annotated benchmark: {bench_file}")
+    recs = load_evaluation_dataset(bench_file)
+    allowed = {"POSITIVE", "NEUTRAL", "NEGATIVE"}
+    unlabeled = sum(str(row.get("ground_truth_sentiment") or "").strip().upper() not in allowed for row in recs)
+    if not recs or unlabeled:
+        raise SystemExit(
+            f"Benchmark has {len(recs):,} rows and {unlabeled:,} missing/invalid human labels. "
+            "Use POSITIVE, NEUTRAL, or NEGATIVE in ground_truth_sentiment for every evaluated record."
+        )
 
     results = run_experiment_pipeline(recs)
     print("\n=== Experiment Execution Complete ===")

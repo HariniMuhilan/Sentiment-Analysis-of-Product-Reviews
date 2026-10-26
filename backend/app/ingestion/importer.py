@@ -9,31 +9,31 @@ from datetime import datetime, timezone
 PLATFORM_DEFINITIONS = [
     {
         "code": "amazon",
-        "name": "Amazon",
-        "description": "Amazon Customer Reviews Dataset (US Reviews category TSVs)",
-        "source_info": "Amazon Customer Reviews Dataset (Public Academic/Research format). Available under AWS Open Data Program.",
-        "terms_info": "Subject to Amazon Customer Reviews Public Dataset Terms. Non-commercial research & education use only."
+        "name": "Amazon (generic import)",
+        "description": "Generic Amazon platform code for authorized local imports.",
+        "source_info": "No generic Amazon dataset is bundled. The local UCSD Amazon Reviews 2023 corpus is registered separately.",
+        "terms_info": "Use only with a dataset whose source terms and research permissions have been verified."
     },
     {
         "code": "flipkart",
-        "name": "Flipkart",
-        "description": "Flipkart Product Sentiment Dataset (Dataset-SA.csv)",
-        "source_info": "Flipkart E-Commerce Reviews Research Dataset (Curated Sentiment Collection).",
-        "terms_info": "Academic and open research evaluation. Original platform terms apply to original reviews."
+        "name": "Flipkart (not configured)",
+        "description": "Provider-specific research data is not included or configured.",
+        "source_info": "No authorized Flipkart review data is currently loaded.",
+        "terms_info": "Import only after obtaining and documenting appropriate provider authorization."
     },
     {
         "code": "myntra",
-        "name": "Myntra",
-        "description": "Myntra Fashion Reviews Dataset",
-        "source_info": "Myntra Apparel and Footwear Reviews Dataset.",
-        "terms_info": "Research use. Respects author privacy; direct identifiers stripped."
+        "name": "Myntra (not configured)",
+        "description": "Provider-specific research data is not included or configured.",
+        "source_info": "No authorized Myntra review data is currently loaded.",
+        "terms_info": "Import only after obtaining and documenting appropriate provider authorization."
     },
     {
         "code": "meesho",
-        "name": "Meesho",
-        "description": "Meesho Social Commerce Reviews Dataset",
-        "source_info": "Meesho Customer Feedback and Product Review Corpus.",
-        "terms_info": "Research evaluation use. Anonymized review text only."
+        "name": "Meesho (not configured)",
+        "description": "Provider-specific research data is not included or configured.",
+        "source_info": "No authorized Meesho review data is currently loaded.",
+        "terms_info": "Import only after obtaining and documenting appropriate provider authorization."
     }
 ]
 

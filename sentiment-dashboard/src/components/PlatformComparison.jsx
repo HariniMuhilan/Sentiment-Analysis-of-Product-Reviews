@@ -24,7 +24,7 @@ export default function PlatformComparison({ analysis }) {
     <section className="platform-comparison-section" aria-labelledby="platform-comparison-title">
       <div className="section-header flex-between">
         <div>
-          <h2 id="platform-comparison-title">Platform Comparative Analysis</h2>
+          <h2 id="platform-comparison-title">Source Coverage and Sentiment</h2>
           <p className="section-subtitle">
             Cross-marketplace breakdown with sample size verification and 95% Wilson confidence intervals.
           </p>

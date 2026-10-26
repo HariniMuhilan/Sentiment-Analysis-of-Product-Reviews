@@ -1,94 +1,46 @@
-# Datasets & Acquisition Guide
+# Research data
 
-This directory documents the data sources, licensing terms, schema specifications, and acquisition guidelines for the cross-platform sentiment analysis system.
+## Amazon Reviews 2023 (UCSD McAuley Lab)
 
----
+The local research database is populated from the **All_Beauty** and **Appliances** category files in the Amazon Reviews 2023 corpus. The two source files contained 2,830,133 rows; deterministic duplicate checks imported **2,797,473 unique reviews** and skipped 33,660 repeated rows. The database contains 112,578 Beauty products and 94,318 Appliances products. Category-level counts and source-file SHA-256 hashes are recorded in `research/data_manifest.json`.
 
-## ⚖️ Legal & Compliance Framework
+- Dataset page and downloads: <https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023>
+- Dataset paper: Hou et al., *Bridging Language and Items for Retrieval and Recommendation* (2024), <https://arxiv.org/abs/2403.03952>
+- Source collection period: May 1996 through September 2023; records are historical, not live marketplace data.
+- Curator's licensing statement: no license is assigned by the curators; the files are provided primarily for research. Use only for research after reviewing the source terms and applicable law. Do not publish or redistribute the raw corpus or a database containing its review text without permission.
+- These records represent Amazon only. They do not provide cross-retailer reviews, current stock, or current prices. Item metadata prices are often missing and are historical; they must not be presented as current prices.
 
-> **Important Policy Notice**:
-> This project operates exclusively on **authorized, pre-collected, or permissible research datasets**. 
-> Automated web scraping of Amazon, Flipkart, Myntra, or Meesho web pages or live search results is strictly **prohibited** under their respective Terms of Service and is **not implemented** in this repository.
+The downloaded review text and item metadata are stored under `Datasets/research/raw/`. `.gitignore` excludes these files and the local SQLite database. Keep them local and do not commit or push them to GitHub.
 
-All sentiment calculations and platform comparisons are computed solely against records loaded into the local database via authorized ingestion tools (`backend/run_ingest.py` or the `/api/ingest` endpoint).
+## Download the research files
 
----
+From the repository root in PowerShell:
 
-## 📦 Platform Datasets Overview
-
-### 1. Amazon Customer Reviews Dataset
-- **Provider**: Amazon Web Services (AWS Open Data Program)
-- **Format**: Tab-Separated Values (`.tsv`) or compressed `.tsv.gz`
-- **License / Terms**: Non-commercial academic research and educational evaluation under the AWS Customer Reviews Public Dataset Terms.
-- **Attributes Mapped**:
-  | Original Field | Target Column | Description |
-  |---|---|---|
-  | `review_id` | `external_id` | Unique alphanumeric review ID |
-  | `product_title` | `product_name` | Full catalog product title |
-  | `product_category` | `category` | Marketplace category (e.g., Wireless, Electronics) |
-  | `star_rating` | `rating` | Customer rating (1.0 to 5.0) |
-  | `review_headline` | `headline` | Review title summary |
-  | `review_body` | `review_text` | Full customer review text |
-  | `helpful_votes` | `helpful_votes` | Helpful community feedback votes |
-  | `review_date` | `review_date` | Date of publication (ISO YYYY-MM-DD) |
-
-### 2. Flipkart E-Commerce Reviews
-- **Provider**: Curated Public E-Commerce Research Corpus (`Dataset-SA.csv`)
-- **Format**: Comma-Separated Values (`.csv`)
-- **License / Terms**: Open research evaluation. Direct customer identifiers are excluded.
-- **Attributes Mapped**:
-  | Original Field | Target Column | Description |
-  |---|---|---|
-  | `ProductName` | `product_name` | Product name |
-  | `Rate` / `Rating` | `rating` | Star rating (1.0 to 5.0) |
-  | `Summary` | `headline` | Review headline |
-  | `Review` | `review_text` | Full review feedback text |
-  | `Date` | `review_date` | Published timestamp |
-
-### 3. Myntra Fashion & Apparel Reviews
-- **Format**: Comma-Separated Values (`.csv`)
-- **Focus**: Apparel, footwear, fitment, and fabric feedback.
-- **License / Terms**: Academic evaluation. Author personal identifiers (PII) stripped.
-- **Attributes Mapped**:
-  `product_name`, `brand` (mapped to `category`), `rating`, `review_text`, `review_date`.
-
-### 4. Meesho Product Reviews
-- **Format**: Comma-Separated Values (`.csv`)
-- **Focus**: Value-for-money customer satisfaction across home and budget apparel categories.
-- **License / Terms**: Anonymized evaluation corpus for NLP benchmarking.
-- **Attributes Mapped**:
-  `product_name`, `category`, `rating`, `review_text`, `review_date`.
-
----
-
-## 🔒 Privacy & Data Retention Guidelines
-
-1. **PII Stripping**: All user identifying attributes (customer real names, email addresses, street addresses, IP addresses) must be purged prior to ingestion.
-2. **Deduplication**: Ingestion parsers compute a cryptographic hash (`SHA-256`) of `(platform, product_name, review_text)` and enforce unique `external_id` constraints to prevent replay inflation.
-3. **Storage**: Ingested records reside in local storage (`sentiment.db` or PostgreSQL). Raw datasets larger than 100MB should remain on external storage or cloud buckets and are excluded from Git via `.gitignore`.
-
----
-
-## 🚀 How to Ingest Datasets
-
-### Option A: Using the CLI Tool
-```bash
-# Ingest Amazon TSV reviews
-python backend/run_ingest.py --platform amazon --file path/to/amazon_reviews_us_Electronics.tsv
-
-# Ingest Flipkart CSV reviews
-python backend/run_ingest.py --platform flipkart --file path/to/flipkart_reviews.csv
-
-# Ingest Generic / Unified CSV dataset
-python backend/run_ingest.py --platform generic --file Datasets/sample_authorized_reviews.csv
+```powershell
+New-Item -ItemType Directory -Force Datasets/research/raw | Out-Null
+curl.exe -L --fail --retry 3 -o Datasets/research/raw/All_Beauty.jsonl `
+  "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/review_categories/All_Beauty.jsonl?download=true"
+curl.exe -L --fail --retry 3 -o Datasets/research/raw/meta_All_Beauty.jsonl `
+  "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/meta_categories/meta_All_Beauty.jsonl?download=true"
+curl.exe -L --fail --retry 3 -o Datasets/research/raw/Appliances.jsonl `
+  "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/review_categories/Appliances.jsonl?download=true"
+curl.exe -L --fail --retry 3 -o Datasets/research/raw/meta_Appliances.jsonl `
+  "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/meta_categories/meta_Appliances.jsonl?download=true"
 ```
 
-### Option B: Using the Ingestion API
-```bash
-curl -X POST "http://localhost:8000/api/ingest" \
-  -F "platform=generic" \
-  -F "file=@Datasets/sample_authorized_reviews.csv"
+## Import into the local application
+
+The project uses `backend/sentiment_research.db` by default. From the repository root:
+
+```powershell
+cd backend
+..\.venv\Scripts\python.exe ingest_ucsd_amazon_2023.py
 ```
 
-### Option C: Sample Demo Data
-A curated sample dataset of multi-platform reviews is provided in `Datasets/sample_authorized_reviews.csv`. It can be ingested at any time to initialize or restore demo catalog data.
+The importer reads JSONL incrementally, matches reviews to item titles from the metadata, computes the project's documented VADER scores, and commits in batches. It is safe to rerun: deterministic review IDs are used to skip records already imported. For a quick smoke run, use `--max-records 1000`; use `--categories Appliances` or `--categories All_Beauty` to import one domain.
+
+The original 43-row synthetic fixture remains available at `Datasets/sample_authorized_reviews.csv` for tests and UI demos only. It is not part of the research database. Do not use it as empirical evidence.
+
+## Other marketplaces
+
+No authorized Flipkart, Myntra, or Meesho review corpus is currently included. Community uploads with unclear provenance or scraping-derived data are excluded. Cross-platform claims require licensed data or written research access from each marketplace.
