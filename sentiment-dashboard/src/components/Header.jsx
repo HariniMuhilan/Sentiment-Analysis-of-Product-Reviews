@@ -41,7 +41,7 @@ export default function Header({ health, onOpenModelInfo }) {
       </div>
 
       <div className="header-headline">
-        <h1>Cross-Platform Review Sentiment Analysis</h1>
+        <h1>Sentiment Analysis Review</h1>
         <p className="header-description">
           Evaluate customer feedback across Amazon, Flipkart, Myntra, and Meesho using genuine lexical sentiment analysis with 95% Wilson confidence intervals.
         </p>
