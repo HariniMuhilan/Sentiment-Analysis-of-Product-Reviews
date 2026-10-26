@@ -32,9 +32,13 @@ The repository now contains a separate Olist Brazil corpus under CC BY-NC-SA 4.0
 
 The repository also contains a privacy-minimized derivative of **B2W-Reviews01**, an Americanas.com product-review corpus under CC BY-NC-SA 4.0. It retains 132,301 reviews and their product/category metadata while removing reviewer ID and demographic columns. It is not loaded into the main Amazon database. Portuguese text is outside the validated coverage of the current VADER model, and same-product cross-platform matching is not established. See [`Datasets/B2WReviews01/README.md`](../Datasets/B2WReviews01/README.md).
 
+The same directory contains **RePro**, a human-annotated Brazilian Portuguese subset of B2W-Reviews01. The downloaded release has 10,003 rows, although its paper reports 10,000. The full privacy-minimized file retains four sentiment labels, including mixed polarity; the API evaluation subset contains 7,985 single-polarity rows and omits 2,018 mixed rows for three-class scoring. Its source annotation process reports average sentiment Cohen's kappa of 0.71. The `BenchmarkReview` table stores these labels separately from searchable reviews. VADER scores on this Portuguese benchmark are only a cross-language stress baseline, not validated in-language performance. Since RePro is drawn from B2W, the two corpora are overlapping, not independent samples.
+
+The recorded RePro stress run is in [`results/repro_vader_benchmark.json`](../results/repro_vader_benchmark.json) and [`results/tables/repro_vader_benchmark.md`](../results/tables/repro_vader_benchmark.md). It reports VADER accuracy 0.2282 and macro F1 0.2414 on the 7,985 non-mixed examples. These are out-of-language measurements and should be used to motivate a Portuguese-capable model, not as that model's performance estimate.
+
 ## Research limitations
 
-- The active data is from one marketplace, so it cannot support cross-platform comparisons.
+- The main searchable product database is Amazon-only. RePro supplies separate human labels for Americanas, but product IDs do not link to Amazon; no matched-product cross-platform effect can be estimated from the current collections.
 - Category subsets are not representative probability samples of all customers or products. They inherit the original collection and curation biases.
 - Source ratings are observed labels, not human-annotated sentiment ground truth. Analyses of VADER agreement with ratings must be described as rating-text agreement, not validated sentiment accuracy.
 - Products are matched to source metadata by parent ASIN. Missing metadata is retained as an explicit fallback product name and should be counted in quality checks.

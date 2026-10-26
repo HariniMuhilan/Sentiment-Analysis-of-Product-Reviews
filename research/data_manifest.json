@@ -1,12 +1,14 @@
 {
   "project": "Sentiment Analysis Review",
   "manifest_version": "2.0.0",
-  "generated_at": "2026-10-26T15:55:56+00:00",
+  "generated_at": "2026-10-26T16:06:16Z",
   "local_research_database": {
     "path": "backend/sentiment_research.db",
     "review_count": 2797473,
     "product_count": 206896,
     "source_platform": "amazon_ucsd_2023",
+    "benchmark_review_count": 7985,
+    "benchmark_dataset": "RePro-2024-single-polarity",
     "excluded_from_git": true
   },
   "datasets": [
@@ -160,11 +162,63 @@
         "CC BY-NC-SA conditions apply to corpus and derivatives; repository MIT code license does not replace them."
       ],
       "attribution": "B2W Digital. B2W-Reviews01. Americanas Tech GitHub repository. CC BY-NC-SA 4.0. https://github.com/americanas-tech/b2w-reviews01"
+    },
+    {
+      "id": "REPRO-AMERICANAS-2024",
+      "name": "RePro human-annotated opinion-mining corpus",
+      "type": "human_annotated_sentiment_and_topic_benchmark",
+      "provider": "RePro authors; sampled from B2W-Reviews01 / Americanas.com",
+      "source_url": "https://github.com/lucasnil/repro",
+      "paper_url": "https://aclanthology.org/2024.propor-1.44/",
+      "license": "CC BY-NC-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "downloaded_at": "2026-10-26",
+      "source_platform": "Americanas.com (Brazil)",
+      "country": "Brazil",
+      "language": "Brazilian Portuguese",
+      "paper_reported_rows": 10000,
+      "downloaded_release_rows": 10003,
+      "prepared_rows": 10003,
+      "three_class_single_polarity_rows": 7985,
+      "mixed_positive_negative_rows_excluded_from_three_class_evaluation": 2018,
+      "sentiment_label_counts": {
+        "POSITIVE": 4127,
+        "NEGATIVE": 3449,
+        "NEUTRAL": 409,
+        "MIXED": 2018
+      },
+      "source_sha256": "a90352f1372b971c5376ecff13fd66a1ae557c4181ed2c0fb3974fce72f23fe5",
+      "prepared_data_path": "Datasets/B2WReviews01/processed/RePro-clean.csv",
+      "prepared_sha256": "37bf057e1463fdfef248ce4e782ff48dfd04f3c3c0a7471ade62b0a1113f7ff0",
+      "three_class_evaluation_path": "Datasets/B2WReviews01/processed/RePro-3class-evaluation.csv",
+      "three_class_evaluation_sha256": "80d6579dfea609dfe61f3b200dab0c9d8083d527e8975443f778ccbe7de94c86",
+      "preparation_summary": "Datasets/B2WReviews01/processed/RePro-preparation-summary.json",
+      "preparation_script": "research/prepare_repro_benchmark.py",
+      "evaluation_script": "research/run_repro_benchmark.py",
+      "api_benchmark_importer": "backend/ingest_repro_benchmark.py",
+      "api_benchmark_rows_loaded_locally": 7985,
+      "annotation_method": "At least two annotators per sample with expert adjudication; mean sentiment Cohen's kappa 0.71 reported in the paper.",
+      "removed_fields": [
+        "reviewer_id",
+        "reviewer_birth_year",
+        "reviewer_gender",
+        "reviewer_state"
+      ],
+      "limitations": [
+        "The released CSV contains 10,003 rows, while the paper reports 10,000; preserve and disclose this discrepancy.",
+        "The source sample was stratified by star rating; class proportions are not natural marketplace prevalence estimates.",
+        "The three-class evaluation excludes 2,018 mixed-polarity annotations; report this exclusion.",
+        "RePro is a subset of B2W-Reviews01 and must not be counted as independent additional review volume.",
+        "Current VADER is English-oriented; Portuguese results are cross-language stress measurements, not validated Portuguese model performance.",
+        "CC BY-NC-SA conditions apply to this corpus and derivatives; repository MIT code license does not replace them."
+      ],
+      "attribution": "dos Santos Silva et al. (2024). RePro: a benchmark for Opinion Mining for Brazilian Portuguese. PROPOR, pp. 432-440. Credit B2W Digital as required by the dataset notice. CC BY-NC-SA 4.0. https://github.com/lucasnil/repro"
     }
   ],
   "not_included": [
     "No dataset with reviews of the same identified product model across multiple retailers is included. Public candidates and pending rights checks are documented in research/cross_platform_data_clearance.md.",
     "The Olist supplementary corpus is separate from and not loaded into the main application database.",
+    "RePro is an annotated subset of B2W-Reviews01, not an independent additional review corpus; its 3-class benchmark excludes mixed labels.",
     "No authorized Flipkart, Myntra, Meesho, Daraz, or Pickaboo review corpus is included.",
     "Amazon Reviews 2023 files and this derived database are not committed to the repository."
   ]

@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg?logo=python&logoColor=white)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An end-to-end product review sentiment analysis application and reproducible research framework. The current empirical corpus contains historical Amazon reviews from the UCSD McAuley Lab Amazon Reviews 2023 dataset in the All Beauty and Appliances categories. It uses a Python FastAPI backend, a VADER sentiment pipeline, and a React analytics dashboard. The current corpus does not support cross-marketplace claims or live price comparisons.
+An end-to-end product review sentiment analysis application and reproducible research framework. The main searchable product corpus contains historical Amazon reviews from the UCSD McAuley Lab Amazon Reviews 2023 dataset in the All Beauty and Appliances categories. A separate, human-annotated RePro benchmark from Americanas.com is available for model evaluation, alongside supplementary Olist and B2W research files. The current English-oriented VADER model is not validated for Portuguese, and these datasets do not establish matched-product cross-marketplace results or live prices.
 
 ---
 
@@ -20,6 +20,8 @@ Sentiment-Analysis-of-Product-Reviews/
 │   ├── data_sources.md          # Primary source ledger, licensing terms, & access blockers
 │   ├── data_manifest.json       # SHA-256 data manifest and provenance records
 │   ├── run_experiments.py       # Experiment reproduction runner & baseline benchmark script
+│   ├── prepare_repro_benchmark.py # Privacy-minimized RePro corpus preparation
+│   ├── run_repro_benchmark.py  # RePro cross-language benchmark runner
 │   └── manuscript.md            # Venue-neutral academic research manuscript draft
 ├── results/                     # Machine-readable experiment outputs & tables
 │   ├── experiment_summary.json  # Comprehensive metric outputs (VADER, ZeroR, ECE)
@@ -41,6 +43,7 @@ Sentiment-Analysis-of-Product-Reviews/
 │   │   └── api/                 # Endpoints (/health, /products, /analysis, /reviews, etc.)
 │   ├── tests/                   # 26 automated tests (pytest + httpx)
 │   ├── run_ingest.py            # Dataset ingestion CLI tool
+│   ├── ingest_repro_benchmark.py # Load the 3-class RePro gold subset for API evaluation
 │   └── requirements.txt         # Pinned backend dependencies
 ├── sentiment-dashboard/         # React 19 + Vite frontend
 │   ├── src/
@@ -128,7 +131,7 @@ Open `http://localhost:5173` in your browser.
 
 ## 📥 Research Data and Additional Imports
 
-The local research corpus, its source limitations, download steps, and importer are documented in [`Datasets/README.md`](Datasets/README.md). The project does not bundle review text in Git. Only import additional collections after verifying source rights and research permissions. The generic CSV/TSV importer is available for a rights-cleared local file; the synthetic fixture is for software checks only and must not be mixed into empirical analysis.
+Dataset sources, separate licenses, preparation steps, and limitations are documented in [`Datasets/README.md`](Datasets/README.md). Amazon review text and the populated application database remain local-only. The privacy-minimized B2W and RePro data files are tracked under their separate CC BY-NC-SA 4.0 terms; Olist data is kept separate from the searchable application database. The synthetic fixture is for software checks only and must not be mixed into empirical analysis.
 
 ---
 
@@ -139,6 +142,15 @@ The local research corpus, its source limitations, download steps, and importer 
 python research/run_experiments.py
 ```
 Requires `Datasets/research/benchmark_annotated.csv` with independently adjudicated labels before producing accuracy, F1, or calibration results. It intentionally stops if no valid human-labeled benchmark exists. Star ratings are not ground-truth sentiment labels. The old 20-row synthetic fixture output in `results/` is marked and excluded from research claims.
+
+RePro has its own reproducible cross-language stress benchmark:
+
+```bash
+python research/prepare_repro_benchmark.py
+python research/run_repro_benchmark.py
+```
+
+The first command recreates privacy-minimized RePro files from the author release stored under `Datasets/B2WReviews01/raw/`. The second evaluates VADER on 7,985 non-mixed, human-labeled Brazilian Portuguese reviews and writes `results/repro_vader_benchmark.json` and `results/tables/repro_vader_benchmark.md`. Since VADER is English-oriented, the result is a cross-language stress baseline, not validated Portuguese performance. To expose these records in the API evaluation endpoint, run `python ingest_repro_benchmark.py` from `backend/`; it writes only to the separate benchmark table, not the product review table.
 
 ### 2. Backend Unit & Integration Tests (26 Tests)
 ```bash

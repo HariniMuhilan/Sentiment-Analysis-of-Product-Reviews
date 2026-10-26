@@ -1,0 +1,236 @@
+{
+  "dataset": "RePro single-polarity 3-class evaluation subset",
+  "source": "RePro 2024, based on B2W-Reviews01 / Americanas.com",
+  "language": "Brazilian Portuguese",
+  "samples_evaluated": 7985,
+  "full_repro_release_rows": 10003,
+  "mixed_reviews_excluded_from_three_class_evaluation": 2018,
+  "sampling_note": "RePro was sampled stratified by star rating; metrics are not prevalence estimates.",
+  "model_scope_warning": "VADER is English-oriented. This cross-language stress result is not validated Portuguese in-language performance and should not be used to claim Portuguese model quality.",
+  "source_license": "CC BY-NC-SA 4.0",
+  "citation": "dos Santos Silva et al. (2024). RePro: a benchmark for Opinion Mining for Brazilian Portuguese. Proceedings of PROPOR, pp. 432-440.",
+  "results": {
+    "overall": {
+      "total_samples": 7985,
+      "accuracy": 0.2282,
+      "macro_f1": 0.2414,
+      "per_class": {
+        "POSITIVE": {
+          "precision": 0.7413,
+          "recall": 0.1708,
+          "f1_score": 0.2777,
+          "support": 4127
+        },
+        "NEUTRAL": {
+          "precision": 0.0572,
+          "recall": 0.824,
+          "f1_score": 0.1071,
+          "support": 409
+        },
+        "NEGATIVE": {
+          "precision": 0.68,
+          "recall": 0.2262,
+          "f1_score": 0.3394,
+          "support": 3449
+        }
+      },
+      "confusion_matrix": {
+        "POSITIVE": {
+          "POSITIVE": 705,
+          "NEUTRAL": 3094,
+          "NEGATIVE": 328
+        },
+        "NEUTRAL": {
+          "POSITIVE": 33,
+          "NEUTRAL": 337,
+          "NEGATIVE": 39
+        },
+        "NEGATIVE": {
+          "POSITIVE": 213,
+          "NEUTRAL": 2456,
+          "NEGATIVE": 780
+        }
+      },
+      "class_distribution": {
+        "actual": {
+          "POSITIVE": 4127,
+          "NEGATIVE": 3449,
+          "NEUTRAL": 409
+        },
+        "predicted": {
+          "NEUTRAL": 5887,
+          "NEGATIVE": 1147,
+          "POSITIVE": 951
+        }
+      }
+    },
+    "per_platform": {
+      "americanas_brazil": {
+        "total_samples": 7985,
+        "accuracy": 0.2282,
+        "macro_f1": 0.2414,
+        "per_class": {
+          "POSITIVE": {
+            "precision": 0.7413,
+            "recall": 0.1708,
+            "f1_score": 0.2777,
+            "support": 4127
+          },
+          "NEUTRAL": {
+            "precision": 0.0572,
+            "recall": 0.824,
+            "f1_score": 0.1071,
+            "support": 409
+          },
+          "NEGATIVE": {
+            "precision": 0.68,
+            "recall": 0.2262,
+            "f1_score": 0.3394,
+            "support": 3449
+          }
+        },
+        "confusion_matrix": {
+          "POSITIVE": {
+            "POSITIVE": 705,
+            "NEUTRAL": 3094,
+            "NEGATIVE": 328
+          },
+          "NEUTRAL": {
+            "POSITIVE": 33,
+            "NEUTRAL": 337,
+            "NEGATIVE": 39
+          },
+          "NEGATIVE": {
+            "POSITIVE": 213,
+            "NEUTRAL": 2456,
+            "NEGATIVE": 780
+          }
+        },
+        "class_distribution": {
+          "actual": {
+            "POSITIVE": 4127,
+            "NEGATIVE": 3449,
+            "NEUTRAL": 409
+          },
+          "predicted": {
+            "NEUTRAL": 5887,
+            "NEGATIVE": 1147,
+            "POSITIVE": 951
+          }
+        }
+      }
+    },
+    "calibration_ece": 0.6998,
+    "baselines": {
+      "majority_zero_r": {
+        "total_samples": 7985,
+        "accuracy": 0.5168,
+        "macro_f1": 0.2272,
+        "per_class": {
+          "POSITIVE": {
+            "precision": 0.5168,
+            "recall": 1.0,
+            "f1_score": 0.6815,
+            "support": 4127
+          },
+          "NEUTRAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0.0,
+            "support": 409
+          },
+          "NEGATIVE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0.0,
+            "support": 3449
+          }
+        },
+        "confusion_matrix": {
+          "POSITIVE": {
+            "POSITIVE": 4127,
+            "NEUTRAL": 0,
+            "NEGATIVE": 0
+          },
+          "NEUTRAL": {
+            "POSITIVE": 409,
+            "NEUTRAL": 0,
+            "NEGATIVE": 0
+          },
+          "NEGATIVE": {
+            "POSITIVE": 3449,
+            "NEUTRAL": 0,
+            "NEGATIVE": 0
+          }
+        },
+        "class_distribution": {
+          "actual": {
+            "POSITIVE": 4127,
+            "NEGATIVE": 3449,
+            "NEUTRAL": 409
+          },
+          "predicted": {
+            "POSITIVE": 7985
+          }
+        },
+        "majority_class": "POSITIVE"
+      },
+      "star_rating_heuristic": {
+        "total_samples": 7985,
+        "accuracy": 0.8438,
+        "macro_f1": 0.702,
+        "per_class": {
+          "POSITIVE": {
+            "precision": 0.9819,
+            "recall": 0.828,
+            "f1_score": 0.8984,
+            "support": 4127
+          },
+          "NEUTRAL": {
+            "precision": 0.1907,
+            "recall": 0.5844,
+            "f1_score": 0.2876,
+            "support": 409
+          },
+          "NEGATIVE": {
+            "precision": 0.9477,
+            "recall": 0.8936,
+            "f1_score": 0.9199,
+            "support": 3449
+          }
+        },
+        "confusion_matrix": {
+          "POSITIVE": {
+            "POSITIVE": 3417,
+            "NEUTRAL": 680,
+            "NEGATIVE": 30
+          },
+          "NEUTRAL": {
+            "POSITIVE": 30,
+            "NEUTRAL": 239,
+            "NEGATIVE": 140
+          },
+          "NEGATIVE": {
+            "POSITIVE": 33,
+            "NEUTRAL": 334,
+            "NEGATIVE": 3082
+          }
+        },
+        "class_distribution": {
+          "actual": {
+            "POSITIVE": 4127,
+            "NEGATIVE": 3449,
+            "NEUTRAL": 409
+          },
+          "predicted": {
+            "POSITIVE": 3480,
+            "NEUTRAL": 1253,
+            "NEGATIVE": 3252
+          }
+        }
+      }
+    },
+    "model_name": "vader-lexicon-v3.3",
+    "model_version": "1.0.0"
+  }
+}

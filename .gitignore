@@ -49,9 +49,13 @@ Datasets/OlistBrazilianEcommerce/raw/*
 !Datasets/OlistBrazilianEcommerce/raw/product_category_name_translation.csv
 !Datasets/B2WReviews01/
 Datasets/B2WReviews01/raw/
+!Datasets/B2WReviews01/raw/RePro.csv
 !Datasets/B2WReviews01/processed/
 Datasets/B2WReviews01/processed/*
 !Datasets/B2WReviews01/processed/B2W-Reviews01-clean.csv.gz
+!Datasets/B2WReviews01/processed/RePro-clean.csv
+!Datasets/B2WReviews01/processed/RePro-3class-evaluation.csv
+!Datasets/B2WReviews01/processed/RePro-preparation-summary.json
 !Datasets/OlistBrazilianEcommerce/
 !Datasets/OlistBrazilianEcommerce/raw/
 Datasets/OlistBrazilianEcommerce/raw/*

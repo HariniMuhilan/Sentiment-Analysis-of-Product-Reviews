@@ -1,0 +1,30 @@
+{
+  "dataset": "RePro",
+  "provider": "RePro authors; based on B2W-Reviews01 from Americanas.com",
+  "source_url": "https://github.com/lucasnil/repro",
+  "license": "CC BY-NC-SA 4.0",
+  "source_rows_reported_by_paper": 10000,
+  "source_rows_in_downloaded_release": 10003,
+  "source_sha256": "a90352f1372b971c5376ecff13fd66a1ae557c4181ed2c0fb3974fce72f23fe5",
+  "prepared_rows": 10003,
+  "single_polarity_3class_evaluation_rows": 7985,
+  "label_counts": {
+    "MIXED": 2018,
+    "NEGATIVE": 3449,
+    "NEUTRAL": 409,
+    "POSITIVE": 4127
+  },
+  "mixed_reviews_excluded_from_3class_evaluation": 2018,
+  "removed_fields": [
+    "reviewer_id",
+    "reviewer_birth_year",
+    "reviewer_gender",
+    "reviewer_state"
+  ],
+  "full_corpus_path": "Datasets\\B2WReviews01\\processed\\RePro-clean.csv",
+  "full_corpus_sha256": "37bf057e1463fdfef248ce4e782ff48dfd04f3c3c0a7471ade62b0a1113f7ff0",
+  "evaluation_file_path": "Datasets\\B2WReviews01\\processed\\RePro-3class-evaluation.csv",
+  "evaluation_file_sha256": "80d6579dfea609dfe61f3b200dab0c9d8083d527e8975443f778ccbe7de94c86",
+  "annotation_note": "The paper reports 10,000 samples; the downloaded CSV contains the exact row count above. The 3-class evaluation excludes multi-polarity mixed reviews.",
+  "model_limit": "VADER is English-oriented; its result on Brazilian Portuguese is a cross-language stress baseline, not validated Portuguese in-language performance."
+}

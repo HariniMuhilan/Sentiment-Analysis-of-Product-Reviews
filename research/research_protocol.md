@@ -112,3 +112,13 @@ To prevent false claims of statistical significance:
    - Statistical comparisons must stratify by category or use **multivariable logistic regression** controlling for:
      $$\text{logit}(P(\text{Positive})) = \beta_0 + \beta_{\text{platform}} X_{\text{platform}} + \beta_{\text{category}} X_{\text{category}} + \beta_{\text{length}} X_{\text{length}} + \epsilon$$
    - A platform difference is only claimed if $\beta_{\text{platform}}$ remains statistically significant ($p < 0.05$) after conditioning on category and length.
+
+---
+
+## 6. Supplementary RePro Benchmark (Exploratory)
+
+RePro is a separate, human-annotated Portuguese-language benchmark derived from Americanas.com B2W-Reviews01 reviews. It is used as a supplementary stress test of the current English-oriented VADER baseline, not pooled with the Amazon corpus and not treated as an independent marketplace sample. The author repository reports the CC BY-NC-SA 4.0 license; cite the dataset authors and the original B2W Digital source when reusing it.
+
+The public CSV contains 10,003 records across four sentiment labels. The prepared full file retains all 10,003 after removing reviewer identifiers and demographic fields. The current three-class evaluation uses 7,985 single-polarity examples; 2,018 MIXED examples are excluded rather than forced into another class. RePro's sampling is stratified by star rating, so this subset does not estimate naturally occurring sentiment prevalence. The published annotation study reports a mean Cohen's kappa of 0.71 and expert adjudication.
+
+Report these metrics only as cross-language stress-test results for this specific benchmark. They are not evidence of Portuguese-language model quality, cross-platform agreement, or marketplace-level sentiment differences. RePro overlaps the source B2W corpus and must not be counted as additional independent review volume. If a Portuguese model is evaluated later, report that as a distinct experiment with language-appropriate preprocessing and baselines.

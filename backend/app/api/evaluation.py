@@ -56,11 +56,31 @@ def get_evaluation_metrics(db: Session = Depends(get_db)):
             for b in db_benchmarks
         ]
         is_empirical = True
-        dataset_source = f"Empirical Database Benchmark Corpus ({len(db_benchmarks)} records)"
-        methodology = (
-            f"Evaluated against {len(db_benchmarks)} human-adjudicated review records stored in database. "
-            "Metrics include Precision, Recall, Macro F1, and 3x3 Confusion Matrix."
-        )
+        source_ids = {b.source for b in db_benchmarks}
+        if source_ids == {"RePro-2024-single-polarity"}:
+            dataset_source = (
+                f"RePro / Americanas.com human-annotated benchmark "
+                f"({len(db_benchmarks):,} single-polarity reviews)"
+            )
+            methodology = (
+                "Brazilian Portuguese review titles and bodies were evaluated against RePro's human labels. "
+                "The RePro paper reports at least two annotators per sample, expert adjudication, and mean "
+                "sentiment Cohen's kappa of 0.71. The source sample was stratified by star rating; its labels "
+                "include a mixed positive/negative class, which is excluded from this three-class evaluation. "
+                "This project's VADER lexicon is English-oriented, so these metrics are a cross-language stress "
+                "baseline, not validated Portuguese in-language performance. Do not interpret them as natural "
+                "marketplace sentiment prevalence."
+            )
+        else:
+            source_text = ", ".join(sorted(source_ids))
+            dataset_source = (
+                f"Empirical Database Benchmark Corpus ({len(db_benchmarks):,} records; {source_text})"
+            )
+            methodology = (
+                f"Evaluated against {len(db_benchmarks):,} human-annotated review records stored in database. "
+                "Metrics include precision, recall, macro F1, and a 3x3 confusion matrix. "
+                "See each source's annotation and language notes before interpreting pooled metrics."
+            )
     else:
         dataset = UNIT_TEST_FIXTURES
         is_empirical = False
