@@ -22,8 +22,13 @@ The repository's `.gitignore` excludes downloaded JSONL files and SQLite databas
 ## Excluded datasets
 
 - `Datasets/sample_authorized_reviews.csv` is a 43-row synthetic fixture for software tests and UI demonstration. It is excluded from the empirical research database.
-- Community datasets claiming Flipkart, Myntra, or Meesho reviews are excluded unless provenance, authorization, and redistribution/use rights are independently verified. The project currently makes no empirical claims about those platforms.
+- The cross-platform source search and rights decisions are recorded in [`cross_platform_data_clearance.md`](cross_platform_data_clearance.md). Public downloads from Flipkart, Daraz, Pickaboo, and other marketplaces are not automatically cleared for reuse; the reviewed candidate corpora remain excluded pending documented rights for the underlying review text.
+- The project currently makes no empirical claims about Flipkart, Myntra, Meesho, Daraz, or Pickaboo.
 - The Amazon Reviews Multi/MARC corpus is not included in the current database. Dataset mirrors carry inconsistent license metadata; do not describe it as CC-BY-4.0 without authoritative confirmation.
+
+## Included auxiliary corpus
+
+The repository includes the **UCI Turkish User Reviews** archive under its separate CC BY 4.0 license. The official record reports 37,056 Turkish review instances across eight broad product categories, collected from an unnamed website. It contains no product IDs, ratings, or dates. It is not loaded into the main Amazon product database and cannot support cross-marketplace comparisons. See `Datasets/README.md` and `research/cross_platform_data_clearance.md` for attribution, limits, and archive hash.
 
 ## Research limitations
 

@@ -40,6 +40,10 @@ Datasets/Meesho/
 
 # Retain sample authorized demo file
 !Datasets/sample_authorized_reviews.csv
+!Datasets/TurkishUserReviews/
+Datasets/TurkishUserReviews/*
+!Datasets/TurkishUserReviews/turkish_user_review_dataset.zip
+!Datasets/TurkishUserReviews/README.md
 
 # Environment and local configs
 .env
