@@ -1,3 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+*.sqlite
+*.sqlite3
+.pytest_cache/
+venv/
+.venv/
+ENV/
+
 # Dependencies
 node_modules/
 */node_modules/
@@ -18,9 +30,13 @@ Datasets/**/*.gz
 Datasets/**/*.parquet
 Datasets/**/*.json
 Datasets/**/*.tar
-Datasets/Amazon/Amazon/
-Datasets/Flipkart/Flipkart_Extracted/
-Datasets/Myntra/Myntra_Extracted/
+Datasets/Amazon/
+Datasets/Flipkart/
+Datasets/Myntra/
+Datasets/Meesho/
+
+# Retain sample authorized demo file
+!Datasets/sample_authorized_reviews.csv
 
 # Environment and local configs
 .env
@@ -35,8 +51,6 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
 # Editor & OS files
 .vscode/*

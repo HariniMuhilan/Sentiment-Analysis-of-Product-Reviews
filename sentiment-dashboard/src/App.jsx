@@ -1,154 +1,237 @@
-import React, { useState } from 'react';
-import { Search, TrendingUp, Award, BarChart2 } from 'lucide-react';
-import { getMockAnalysis, mockPlatforms } from './mockData';
+import React, { useState, useEffect, useCallback } from 'react';
+import Header from './components/Header';
+import SearchBar from './components/SearchBar';
+import Filters from './components/Filters';
+import SummaryCards from './components/SummaryCards';
+import PlatformComparison from './components/PlatformComparison';
+import ReviewList from './components/ReviewList';
+import DataProvenanceBanner from './components/DataProvenanceBanner';
+import ModelEvaluationModal from './components/ModelEvaluationModal';
+import { EmptyState, LoadingSkeleton } from './components/EmptyState';
+import { 
+  fetchHealth, 
+  fetchReadiness, 
+  fetchPlatforms, 
+  fetchSentimentAnalysis, 
+  fetchReviews 
+} from './api/client';
 import './index.css';
 
 function App() {
+  const [health, setHealth] = useState(null);
+  const [readiness, setReadiness] = useState(null);
+  const [platforms, setPlatforms] = useState([]);
+  
   const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(null);
+  const [filters, setFilters] = useState({
+    platform: 'all',
+    sentiment: 'ALL',
+    minRating: null,
+    category: 'all'
+  });
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-    
+  const [analysis, setAnalysis] = useState(null);
+  const [reviewsData, setReviewsData] = useState({ reviews: [], total: 0, total_pages: 1, page: 1 });
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const [loading, setLoading] = useState(true);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isModelModalOpen, setIsModelModalOpen] = useState(false);
+
+  // Initialize status & platforms
+  const initSystem = useCallback(async () => {
+    try {
+      const [hRes, rRes, pRes] = await Promise.allSettled([
+        fetchHealth(),
+        fetchReadiness(),
+        fetchPlatforms()
+      ]);
+
+      if (hRes.status === 'fulfilled') setHealth(hRes.value);
+      if (rRes.status === 'fulfilled') setReadiness(rRes.value);
+      if (pRes.status === 'fulfilled') setPlatforms(pRes.value);
+    } catch (err) {
+      console.warn('System initialization warning:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    initSystem();
+  }, [initSystem]);
+
+  // Main data fetching
+  const loadData = useCallback(async (currQuery, currFilters, currPage = 1) => {
     setLoading(true);
-    // Simulate API call
-    const data = await getMockAnalysis(query);
-    setResults(data);
-    setLoading(false);
+    setError(null);
+    try {
+      const analysisResult = await fetchSentimentAnalysis({
+        query: currQuery,
+        platform: currFilters.platform,
+        sentiment: currFilters.sentiment,
+        minRating: currFilters.minRating,
+        category: currFilters.category
+      });
+      setAnalysis(analysisResult);
+
+      // Reviews list
+      setReviewsLoading(true);
+      const reviewsResult = await fetchReviews({
+        query: currQuery,
+        platform: currFilters.platform,
+        sentiment: currFilters.sentiment,
+        minRating: currFilters.minRating,
+        category: currFilters.category,
+        page: currPage,
+        pageSize: pageSize
+      });
+      setReviewsData(reviewsResult);
+    } catch (err) {
+      console.error('Error fetching sentiment data:', err);
+      setError(err.message || 'Unable to connect to sentiment analysis API.');
+    } finally {
+      setLoading(false);
+      setReviewsLoading(false);
+    }
+  }, [pageSize]);
+
+  // Trigger load on query or filters change
+  useEffect(() => {
+    setPage(1);
+    loadData(query, filters, 1);
+  }, [query, filters, loadData]);
+
+  // Page change handler
+  const handlePageChange = async (newPage) => {
+    if (newPage < 1 || newPage > reviewsData.total_pages) return;
+    setPage(newPage);
+    setReviewsLoading(true);
+    try {
+      const result = await fetchReviews({
+        query: query,
+        platform: filters.platform,
+        sentiment: filters.sentiment,
+        minRating: filters.minRating,
+        category: filters.category,
+        page: newPage,
+        pageSize: pageSize
+      });
+      setReviewsData(result);
+    } catch (err) {
+      console.error('Failed to change page:', err);
+    } finally {
+      setReviewsLoading(false);
+    }
   };
 
+  const handleSearch = (newQuery) => {
+    setQuery(newQuery);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      platform: 'all',
+      sentiment: 'ALL',
+      minRating: null,
+      category: 'all'
+    });
+  };
+
+  const isEmptyCatalog = readiness && readiness.total_reviews === 0;
+
   return (
-    <>
+    <div className="app-layout">
       <div className="container">
-        <header className="animate-fade-in flex-center" style={{ flexDirection: 'column', textAlign: 'center', marginBottom: '2rem' }}>
-          <h1>Cross-Platform Sentiment Analysis</h1>
-          <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', lineHeight: '1.6' }}>
-            Compare product reviews across Amazon, Flipkart, Myntra, and Meesho instantly. 
-            Powered by advanced machine learning models (Prototype).
-          </p>
-        </header>
+        {/* Header & Status */}
+        <Header 
+          health={health} 
+          onOpenModelInfo={() => setIsModelModalOpen(true)} 
+        />
 
-        <form onSubmit={handleSearch} className="search-container animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          <Search className="search-icon" size={20} />
-          <input 
-            type="text" 
-            className="search-input" 
-            placeholder="Enter a product name (e.g., 'iPhone 15 Pro', 'Nike Air Max')"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </form>
+        {/* Data Provenance & Legal Banner */}
+        <DataProvenanceBanner />
 
-        {loading && (
-          <div className="flex-center" style={{ padding: '3rem', color: 'var(--accent-color)' }}>
-            <div style={{ animation: 'spin 1s linear infinite' }}>
-              <TrendingUp size={32} />
-            </div>
-            <span style={{ marginLeft: '1rem', fontWeight: '500' }}>Analyzing sentiments...</span>
+        {/* Search Bar */}
+        <SearchBar 
+          onSearch={handleSearch} 
+          initialQuery={query} 
+        />
+
+        {/* Filters */}
+        <Filters 
+          filters={filters} 
+          onChange={handleFilterChange} 
+          onReset={handleResetFilters}
+          platforms={platforms}
+        />
+
+        {/* Main Content Area */}
+        <main className="content-container">
+          {loading ? (
+            <LoadingSkeleton />
+          ) : error ? (
+            <EmptyState 
+              type="error" 
+              onRetry={() => { initSystem(); loadData(query, filters, 1); }} 
+            />
+          ) : isEmptyCatalog ? (
+            <EmptyState 
+              type="no_data_in_database" 
+              onRetry={() => { initSystem(); loadData(query, filters, 1); }} 
+            />
+          ) : analysis?.total_reviews === 0 ? (
+            <EmptyState 
+              type="no_results" 
+              query={query} 
+            />
+          ) : (
+            <>
+              {/* Summary Metrics */}
+              <SummaryCards analysis={analysis} />
+
+              {/* Cross-Platform Comparison */}
+              <PlatformComparison 
+                analysis={analysis} 
+                platforms={platforms} 
+              />
+
+              {/* Review Explorer */}
+              <ReviewList 
+                reviews={reviewsData.reviews}
+                total={reviewsData.total}
+                page={page}
+                totalPages={reviewsData.total_pages}
+                onPageChange={handlePageChange}
+                isLoading={reviewsLoading}
+              />
+            </>
+          )}
+        </main>
+
+        {/* Model Architecture & Evaluation Modal */}
+        <ModelEvaluationModal 
+          isOpen={isModelModalOpen} 
+          onClose={() => setIsModelModalOpen(false)} 
+        />
+
+        {/* Footer */}
+        <footer className="footer-container flex-between" role="contentinfo">
+          <div>
+            <span>Sentiment Analysis of Product Reviews &copy; {new Date().getFullYear()}</span>
+            <span style={{ margin: '0 0.5rem' }}>•</span>
+            <span>UROP Cross-Platform Intelligence Framework</span>
           </div>
-        )}
-
-        {results && !loading && (
-          <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            
-            <div className="glass-panel" style={{ marginBottom: '2rem', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-              <div style={{ flex: '1', minWidth: '200px' }}>
-                <h3 style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>Overall Verdict</h3>
-                <div className="flex-center" style={{ justifyContent: 'flex-start', marginTop: '0.5rem', gap: '0.5rem' }}>
-                  <Award color="var(--accent-color)" size={24} />
-                  <span style={{ fontSize: '1.25rem', fontWeight: '600' }}>Platform Winner: {results.overall.platformWinner}</span>
-                </div>
-              </div>
-              <div style={{ flex: '1', minWidth: '200px' }}>
-                <h3 style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>Dominant Sentiment</h3>
-                <div style={{ marginTop: '0.5rem' }}>
-                  <span className={`badge ${results.overall.dominantSentiment.toLowerCase()}`}>
-                    {results.overall.dominantSentiment}
-                  </span>
-                </div>
-              </div>
-              <div style={{ flex: '1', minWidth: '200px' }}>
-                <h3 style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>Total Reviews Analyzed</h3>
-                <div style={{ marginTop: '0.5rem', fontSize: '1.25rem', fontWeight: '600' }}>
-                  {results.overall.totalAnalyzed.toLocaleString()}
-                </div>
-              </div>
-            </div>
-
-            <h2 style={{ marginTop: '3rem' }}>Platform Breakdown</h2>
-            <div className="grid-cards">
-              {mockPlatforms.map((platform) => {
-                const data = results.platforms[platform];
-                const positiveWidth = `${data.sentiment.positive}%`;
-                const neutralWidth = `${data.sentiment.neutral}%`;
-                const negativeWidth = `${data.sentiment.negative}%`;
-
-                return (
-                  <div key={platform} className="glass-panel">
-                    <div className="flex-between" style={{ marginBottom: '1rem' }}>
-                      <h3 style={{ color: `var(--${platform.toLowerCase()}-color)` }}>{platform}</h3>
-                      <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                        ★ {data.averageRating.toFixed(1)} / 5
-                      </span>
-                    </div>
-
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <div className="flex-between" style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>
-                        <span>Sentiment Distribution</span>
-                        <span style={{ color: 'var(--text-secondary)' }}>{data.totalReviews.toLocaleString()} reviews</span>
-                      </div>
-                      <div className="bar-chart">
-                        <div className="bar-segment" style={{ width: positiveWidth, backgroundColor: 'var(--positive-color)' }} title={`Positive: ${positiveWidth}`} />
-                        <div className="bar-segment" style={{ width: neutralWidth, backgroundColor: 'var(--neutral-color)' }} title={`Neutral: ${neutralWidth}`} />
-                        <div className="bar-segment" style={{ width: negativeWidth, backgroundColor: 'var(--negative-color)' }} title={`Negative: ${negativeWidth}`} />
-                      </div>
-                      <div className="flex-between" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                        <span><span style={{ color: 'var(--positive-color)' }}>■</span> {data.sentiment.positive}%</span>
-                        <span><span style={{ color: 'var(--neutral-color)' }}>■</span> {data.sentiment.neutral}%</span>
-                        <span><span style={{ color: 'var(--negative-color)' }}>■</span> {data.sentiment.negative}%</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 style={{ fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Sample Reviews</h4>
-                      {data.recentReviews.map(review => (
-                        <div key={review.id} style={{ 
-                          padding: '0.75rem', 
-                          backgroundColor: 'rgba(255,255,255,0.03)', 
-                          borderRadius: '8px', 
-                          marginBottom: '0.5rem',
-                          fontSize: '0.875rem'
-                        }}>
-                          <div style={{ marginBottom: '0.25rem' }}>{review.text}</div>
-                          <div className="flex-between">
-                            <span className={`badge ${review.sentiment}`} style={{ fontSize: '0.65rem' }}>
-                              {review.sentiment}
-                            </span>
-                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                              Conf: {(review.score * 100).toFixed(0)}%
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                  </div>
-                );
-              })}
-            </div>
+          <div>
+            <span>Engine: VADER Lexicon NLP v1.0.0</span>
           </div>
-        )}
+        </footer>
       </div>
-
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}} />
-    </>
+    </div>
   );
 }
 
