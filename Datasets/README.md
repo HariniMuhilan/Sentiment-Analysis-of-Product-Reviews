@@ -44,20 +44,3 @@ The original 43-row synthetic fixture remains available at `Datasets/sample_auth
 ## Other marketplaces
 
 No authorized Flipkart, Myntra, or Meesho review corpus is currently included. Community uploads with unclear provenance or scraping-derived data are excluded. Cross-platform claims require licensed data or written research access from each marketplace.
-
-## Turkish User Reviews (UCI Machine Learning Repository)
-
-The official UCI archive is included at `Datasets/TurkishUserReviews/turkish_user_review_dataset.zip` under the dataset's **CC BY 4.0** license. It contains Turkish-language review text grouped into eight product categories (computers, tea machines, headphones, modems, perfume, mobile phones, TVs, and USB products). UCI reports 37,056 instances. The source says the reviews came from an unnamed website.
-
-This is an auxiliary, text-only corpus. It has no product identifiers, product-level metadata, dates, or ratings, so it must not be shown as products from a named platform, used for price/product matching, or counted as a second marketplace in cross-platform comparisons. Use it only for a separately reported Turkish-language exploratory or external robustness analysis. The project code remains MIT licensed; this dataset retains its separate CC BY 4.0 terms.
-
-**Citation:** Ekinci, E. & İlhan Omurca, S. (2022). *Turkish User Reviews* [Dataset]. UCI Machine Learning Repository. <https://doi.org/10.24432/C5HK72>.
-
-**Attribution:** “Turkish User Reviews” by Ekin Ekinci and Sevinç İlhan Omurca, UCI Machine Learning Repository, CC BY 4.0, <https://doi.org/10.24432/C5HK72>. Dataset archive SHA-256: `34edb4e14ae2fbea0ecce0c31d9830d2361bb4adc5db25258be6a20ff6242142`.
-
-To extract the archive on Windows:
-
-```powershell
-Expand-Archive -LiteralPath Datasets/TurkishUserReviews/turkish_user_review_dataset.zip `
-  -DestinationPath Datasets/TurkishUserReviews/extracted
-```

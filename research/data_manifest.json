@@ -75,39 +75,6 @@
       "record_count": 43,
       "empirical_status": "EXCLUDED_FROM_EMPIRICAL_STUDY",
       "purpose": "Software tests and UI smoke demonstration only; not customer data and not empirical evidence."
-    },
-    {
-      "id": "UCI-TURKISH-USER-REVIEWS-2022",
-      "name": "Turkish User Reviews",
-      "type": "auxiliary_product_review_text_corpus",
-      "provider": "Ekin Ekinci and Sevinç İlhan Omurca; UCI Machine Learning Repository",
-      "source_url": "https://doi.org/10.24432/C5HK72",
-      "download_url": "https://archive.ics.uci.edu/static/public/769/turkish+user+review+dataset.zip",
-      "relative_path": "Datasets/TurkishUserReviews/turkish_user_review_dataset.zip",
-      "license": "CC BY 4.0",
-      "license_url": "https://creativecommons.org/licenses/by/4.0/",
-      "downloaded_at": "2026-10-26",
-      "sha256": "34edb4e14ae2fbea0ecce0c31d9830d2361bb4adc5db25258be6a20ff6242142",
-      "source_reported_instance_count": 37056,
-      "language": "Turkish",
-      "product_categories": [
-        "Computers",
-        "Tea machines",
-        "Headphones",
-        "Modems",
-        "Perfume",
-        "Mobile phones",
-        "Televisions",
-        "USB products"
-      ],
-      "source_platform": "Unnamed website; not identified by UCI",
-      "empirical_status": "AUXILIARY_CORPUS_NOT_LOADED_INTO_PRODUCT_DATABASE",
-      "limitations": [
-        "Text-only; no product identifiers, ratings, or review dates.",
-        "Do not represent as a named marketplace or include in cross-platform product comparisons.",
-        "Use for exploratory Turkish-language robustness analysis only, with separate results and attribution."
-      ],
-      "attribution": "Ekinci, E. & İlhan Omurca, S. (2022). Turkish User Reviews [Dataset]. UCI Machine Learning Repository. CC BY 4.0. https://doi.org/10.24432/C5HK72"
     }
   ],
   "not_included": [
