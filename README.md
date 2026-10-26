@@ -6,14 +6,24 @@
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg?logo=python&logoColor=white)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An end-to-end, cross-platform product review sentiment analysis system comparing customer feedback across **Amazon**, **Flipkart**, **Myntra**, and **Meesho**. Powered by a real Python FastAPI backend, rule-based NLP pipeline (VADER), statistical Wilson score confidence intervals, and a modern React 19 analytics dashboard.
+An end-to-end, cross-platform product review sentiment analysis system and reproducible research framework for evaluating customer feedback across **Amazon**, **Flipkart**, **Myntra**, and **Meesho**. Powered by a real Python FastAPI backend, rule-based NLP pipeline (VADER), statistical hypothesis testing (Two-Proportion Z-Test & Pearson $\chi^2$), and a modern React 19 analytics dashboard.
 
 ---
 
-## 📌 Architecture & Design Principles
+## 📌 Architecture & Research Structure
 
 ```
 Sentiment-Analysis-of-Product-Reviews/
+├── research/                    # Reproducible Research Specification & Protocol
+│   ├── readiness_audit.md       # Research readiness audit and methodology corrections
+│   ├── research_protocol.md     # Pre-registered hypotheses, annotation guide, & baselines
+│   ├── data_sources.md          # Primary source ledger, licensing terms, & access blockers
+│   ├── data_manifest.json       # SHA-256 data manifest and provenance records
+│   ├── run_experiments.py       # Experiment reproduction runner & baseline benchmark script
+│   └── manuscript.md            # Venue-neutral academic research manuscript draft
+├── results/                     # Machine-readable experiment outputs & tables
+│   ├── experiment_summary.json  # Comprehensive metric outputs (VADER, ZeroR, ECE)
+│   └── tables/                  # Markdown tables for manuscript reproduction
 ├── backend/
 │   ├── app/
 │   │   ├── main.py              # FastAPI app, security headers, CORS, routing
@@ -21,15 +31,15 @@ Sentiment-Analysis-of-Product-Reviews/
 │   │   ├── database.py          # SQLAlchemy 2.0 engine & session management
 │   │   ├── models.py            # Platform, Product, Review, AnalysisRun models
 │   │   ├── schemas.py           # Strict Pydantic v2 request/response schemas
-│   │   ├── crud.py              # Dynamic SQL aggregations & Wilson CI calculations
+│   │   ├── crud.py              # Dynamic SQL aggregations, Z-tests, & Chi-Square tests
 │   │   ├── nlp/
-│   │   │   ├── sentiment.py     # VADER sentiment engine & valence calibration
-│   │   │   └── evaluate.py      # Precision, recall, macro F1, and confusion matrix
+│   │   │   ├── sentiment.py     # VADER sentiment engine & intensity calibration
+│   │   │   └── evaluate.py      # Precision, recall, macro F1, ECE, & baselines
 │   │   ├── ingestion/
 │   │   │   ├── parsers.py       # Amazon TSV, Flipkart CSV, Myntra, Meesho parsers
 │   │   │   └── importer.py      # Normalization, validation, deduplication, batch DB insert
 │   │   └── api/                 # Endpoints (/health, /products, /analysis, /reviews, etc.)
-│   ├── tests/                   # 19 automated tests (pytest + httpx)
+│   ├── tests/                   # 26 automated tests (pytest + httpx)
 │   ├── run_ingest.py            # Dataset ingestion CLI tool
 │   └── requirements.txt         # Pinned backend dependencies
 ├── sentiment-dashboard/         # React 19 + Vite frontend
@@ -43,7 +53,7 @@ Sentiment-Analysis-of-Product-Reviews/
 │   └── Dockerfile               # Multi-stage production container build
 ├── Datasets/
 │   ├── README.md                # Platform source documentation, licenses & acquisition
-│   └── sample_authorized_reviews.csv # Curated authorized demo dataset
+│   └── sample_authorized_reviews.csv # Curated demonstration fixture dataset
 ├── docker-compose.yml           # Production multi-container orchestration
 ├── .env.example                 # Environment variables template
 └── LICENSE                      # MIT Open Source License
@@ -51,8 +61,8 @@ Sentiment-Analysis-of-Product-Reviews/
 
 ### Core Design Principles
 1. **Zero Fabricated Data**: All numbers, averages, sentiment percentages, and platform distributions are computed via SQL aggregation (`COUNT`, `AVG`, `SUM(CASE ...)`) against persisted, locally ingested review records.
-2. **Defensible Comparative Statistics**: Avoids arbitrary "winner" declarations. Employs 95% Wilson score confidence intervals for positive sentiment proportions. Differences are only labeled statistically significant if sample sizes satisfy $N \ge 30$ and confidence intervals do not overlap ($p < 0.05$).
-3. **No Live Web Scraping**: In compliance with marketplace terms of service, analysis runs solely on authorized, pre-collected datasets. Live platform scraping is strictly excluded.
+2. **Defensible Comparative Statistics**: Avoids arbitrary "winner" declarations. Employs formal **Two-Proportion $Z$-Tests**, **Pearson $\chi^2$ Tests of Independence**, and **95% Wilson Score Confidence Intervals**. Confounders (product mix, category disparity) are explicitly surfaced.
+3. **No Live Web Scraping**: In compliance with marketplace terms of service, analysis runs solely on authorized, pre-collected datasets. Live platform scraping is strictly excluded and prohibited.
 4. **Boundary Validation & Security**: Request validation using Pydantic v2 schemas, strict CORS settings, rate limits, and security headers (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`).
 
 ---
@@ -139,9 +149,15 @@ python backend/run_ingest.py --platform generic --file Datasets/sample_authorize
 
 ---
 
-## 🧪 Automated Testing
+## 🧪 Automated Testing & Research Reproduction
 
-### Backend Unit & Integration Tests (19 Tests)
+### 1. Research Experiment Runner & Baseline Comparisons
+```bash
+python research/run_experiments.py
+```
+Executes baseline models (Majority Class ZeroR, Star-Rating Heuristic, VADER Lexicon), measures Expected Calibration Error (ECE), evaluates rating-text divergence, and generates machine-readable summary tables in `results/`.
+
+### 2. Backend Unit & Integration Tests (26 Tests)
 ```bash
 cd backend
 pytest -v
@@ -150,16 +166,19 @@ Tests cover:
 - Health and readiness probes (`/api/health`, `/api/ready`)
 - VADER classification thresholds, compound score bounds, and rating reconciliation
 - Ingestion parsers (Amazon TSV, Flipkart CSV, Myntra, Meesho, generic streams)
+- Missing value preservation (ensuring null ratings are never silently converted to 3.0)
+- Statistical hypothesis testing (Two-Proportion Z-Test, Pearson $\chi^2$ 2x3 test, Holm-Bonferroni correction)
+- Expected Calibration Error (ECE) and comparative baseline models (Majority Class ZeroR, Rating Heuristic)
 - Cryptographic deduplication and corrupted record handling
 - Dynamic SQL sentiment aggregations and search query filtering
 - Paginated review querying and out-of-bounds boundary validation
 - Model evaluation runner and confusion matrix calculation
 
-### Frontend Linting & Build
+### 3. Frontend Linting & Build
 ```bash
 cd sentiment-dashboard
-npm run lint    # Verifies oxlint rules (0 errors, 0 warnings)
-npm run build   # Validates production bundle compilation
+npm.cmd run lint    # Verifies oxlint rules (0 errors, 0 warnings)
+npm.cmd run build   # Validates production bundle compilation
 ```
 
 ---

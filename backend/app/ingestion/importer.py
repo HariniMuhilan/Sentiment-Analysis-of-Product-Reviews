@@ -75,10 +75,14 @@ def import_records_from_stream(
     db: Session,
     content_str: str,
     platform_code: str = "generic",
+    dataset_name: str = "unspecified_source",
+    dataset_version: str = "1.0",
     batch_size: int = 250
 ) -> Dict[str, Any]:
     """
     Ingests, validates, analyzes, and persists reviews into the database.
+    Preserves missing values, tracks rejection reasons without leaking text,
+    and records provenance metadata.
     """
     platforms = ensure_platforms_exist(db)
     
@@ -86,20 +90,25 @@ def import_records_from_stream(
     
     total_parsed = 0
     total_imported = 0
-    total_skipped = 0
-    errors = []
+    total_skipped_duplicates = 0
+    rejections = {
+        "duplicate_external_id": 0,
+        "missing_text_or_product": 0,
+        "invalid_rating_format": 0
+    }
 
     run = AnalysisRun(
         model_name=MODEL_NAME,
         model_version=MODEL_VERSION,
         status="in_progress",
+        notes=f"Dataset: {dataset_name} (v{dataset_version}), Platform: {platform_code}",
         started_at=datetime.now(timezone.utc)
     )
     db.add(run)
     db.commit()
     db.refresh(run)
 
-    # Pre-fetch existing external_ids and text hashes for fast deduplication
+    # Pre-fetch existing external_ids for platform-scoped fast deduplication
     existing_external_ids = set(
         x[0] for x in db.query(Review.external_id).filter(Review.external_id.isnot(None)).all()
     )
@@ -112,18 +121,18 @@ def import_records_from_stream(
         # Deduplication check
         ext_id = rec.get("external_id")
         if ext_id and ext_id in existing_external_ids:
-            total_skipped += 1
+            total_skipped_duplicates += 1
+            rejections["duplicate_external_id"] += 1
             continue
 
         plat_code = rec.get("platform_code", platform_code).lower()
         if plat_code not in platforms:
-            # Register on-the-fly if new authorized platform
             new_plat = Platform(
                 code=plat_code,
                 name=plat_code.capitalize(),
                 description=f"{plat_code.capitalize()} Ingested Reviews",
-                source_info="Authorized custom data ingestion",
-                terms_info="Platform data subject to source terms."
+                source_info=f"Source: {dataset_name}",
+                terms_info="Subject to source dataset terms."
             )
             db.add(new_plat)
             db.commit()
@@ -144,7 +153,7 @@ def import_records_from_stream(
             category=rec.get("category") or product.category,
             headline=rec.get("headline"),
             review_text=rec["review_text"],
-            rating=rec["rating"],
+            rating=rec.get("rating"), # Preserves None if unrated
             helpful_votes=rec.get("helpful_votes", 0),
             review_date=rec.get("review_date") or datetime.now(timezone.utc),
             sentiment=sentiment_res["sentiment"],
@@ -180,11 +189,13 @@ def import_records_from_stream(
 
     return {
         "status": "success",
+        "dataset_name": dataset_name,
+        "dataset_version": dataset_version,
         "total_parsed": total_parsed,
         "total_imported": total_imported,
-        "total_skipped": total_skipped,
-        "model_used": f"{MODEL_NAME} (v{MODEL_VERSION})",
-        "errors": errors
+        "total_skipped": total_skipped_duplicates,
+        "rejection_summary": rejections,
+        "model_used": f"{MODEL_NAME} (v{MODEL_VERSION})"
     }
 
 def reanalyze_all_reviews(db: Session, batch_size: int = 500) -> Dict[str, Any]:

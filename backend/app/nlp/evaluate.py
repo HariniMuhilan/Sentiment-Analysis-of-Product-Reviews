@@ -75,14 +75,87 @@ def evaluate_predictions(y_true: List[str], y_pred: List[str]) -> Dict[str, Any]
         }
     }
 
+def compute_expected_calibration_error(confidences: List[float], correct_flags: List[bool], num_bins: int = 10) -> float:
+    """
+    Computes Expected Calibration Error (ECE) partitioned into equal-width confidence bins:
+    ECE = sum(|B_m| / N * |acc(B_m) - conf(B_m)|)
+    """
+    if not confidences or len(confidences) != len(correct_flags):
+        return 0.0
+
+    total = len(confidences)
+    bin_size = 1.0 / num_bins
+    ece = 0.0
+
+    for i in range(num_bins):
+        bin_lower = i * bin_size
+        bin_upper = (i + 1) * bin_size
+        
+        # In range [lower, upper) or [lower, upper] for last bin
+        indices = [
+            j for j, c in enumerate(confidences)
+            if (bin_lower <= c < bin_upper) or (i == num_bins - 1 and bin_lower <= c <= bin_upper)
+        ]
+        
+        if indices:
+            bin_acc = sum(correct_flags[j] for j in indices) / len(indices)
+            bin_conf = sum(confidences[j] for j in indices) / len(indices)
+            ece += (len(indices) / total) * abs(bin_acc - bin_conf)
+
+    return round(float(ece), 4)
+
+def evaluate_majority_baseline(y_true: List[str]) -> Dict[str, Any]:
+    """Evaluates the non-informative ZeroR Majority Class baseline."""
+    if not y_true:
+        return evaluate_predictions([], [])
+    counts = defaultdict(int)
+    for y in y_true:
+        counts[y] += 1
+    majority_class = max(counts.items(), key=lambda x: x[1])[0]
+    y_pred = [majority_class] * len(y_true)
+    res = evaluate_predictions(y_true, y_pred)
+    res["majority_class"] = majority_class
+    return res
+
+def evaluate_rating_heuristic(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Evaluates the Star-Rating Heuristic baseline against ground-truth text sentiment:
+      - rating >= 4.0: POSITIVE
+      - 2.5 <= rating <= 3.5: NEUTRAL
+      - rating <= 2.0: NEGATIVE
+    """
+    y_true = []
+    y_pred = []
+    for rec in records:
+        true_label = rec.get("ground_truth_sentiment", "").upper()
+        if true_label not in CLASSES:
+            continue
+        rating = rec.get("rating")
+        if rating is None:
+            pred = "NEUTRAL"
+        elif rating >= 4.0:
+            pred = "POSITIVE"
+        elif rating <= 2.0:
+            pred = "NEGATIVE"
+        else:
+            pred = "NEUTRAL"
+        y_true.append(true_label)
+        y_pred.append(pred)
+
+    return evaluate_predictions(y_true, y_pred)
+
 def run_evaluation_on_dataset(records: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Evaluates the live VADER sentiment model against a list of ground truth records.
     Each record must have 'review_text' and 'ground_truth_sentiment'.
     Optionally has 'platform_code'.
+    Also calculates comparative baselines (Majority Class ZeroR, Star-Rating Heuristic)
+    and Expected Calibration Error (ECE).
     """
     y_true = []
     y_pred = []
+    confidences = []
+    matches = []
     per_platform_records = defaultdict(lambda: {"true": [], "pred": []})
 
     for rec in records:
@@ -93,15 +166,21 @@ def run_evaluation_on_dataset(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         
         pred_res = analyze_review_text(text, rating=rec.get("rating"))
         pred_label = pred_res["sentiment"]
+        conf = pred_res["confidence"]
 
         y_true.append(true_label)
         y_pred.append(pred_label)
+        confidences.append(conf)
+        matches.append(bool(pred_label == true_label))
 
         platform = rec.get("platform_code", "unknown")
         per_platform_records[platform]["true"].append(true_label)
         per_platform_records[platform]["pred"].append(pred_label)
 
     overall = evaluate_predictions(y_true, y_pred)
+    ece = compute_expected_calibration_error(confidences, matches)
+    majority = evaluate_majority_baseline(y_true)
+    rating_heuristic = evaluate_rating_heuristic(records)
     
     per_platform = {}
     for plat, data in per_platform_records.items():
@@ -110,6 +189,11 @@ def run_evaluation_on_dataset(records: List[Dict[str, Any]]) -> Dict[str, Any]:
     return {
         "overall": overall,
         "per_platform": per_platform,
+        "calibration_ece": ece,
+        "baselines": {
+            "majority_zero_r": majority,
+            "star_rating_heuristic": rating_heuristic
+        },
         "model_name": "vader-lexicon-v3.3",
         "model_version": "1.0.0"
     }

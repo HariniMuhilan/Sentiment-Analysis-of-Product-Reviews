@@ -7,7 +7,10 @@ from app.models import BenchmarkReview
 
 router = APIRouter(tags=["Model Evaluation"])
 
-BENCHMARK_FIXTURES = [
+# Internal sanity-check unit test fixtures for pipeline verification.
+# IMPORTANT: These fixtures are NOT independent validation data and must NEVER be
+# cited as empirical model accuracy or real-world performance evidence.
+UNIT_TEST_FIXTURES = [
     # Positive examples
     {"platform_code": "amazon", "review_text": "This phone has an exceptional camera, stellar battery life, and snappy performance!", "ground_truth_sentiment": "POSITIVE", "rating": 5.0},
     {"platform_code": "amazon", "review_text": "Great quality and fast delivery. Very satisfied with this purchase.", "ground_truth_sentiment": "POSITIVE", "rating": 5.0},
@@ -38,10 +41,9 @@ BENCHMARK_FIXTURES = [
 @router.get("/evaluation", response_model=FullEvaluationResponse)
 def get_evaluation_metrics(db: Session = Depends(get_db)):
     """
-    Returns reproducible evaluation metrics (Precision, Recall, Macro F1, Confusion Matrix,
-    Class Balance) measured against standard validation benchmark datasets.
+    Returns evaluation metrics. Explicitly flags whether the evaluation is derived
+    from a verified empirical human-annotated benchmark or internal unit-test fixtures.
     """
-    # Check if custom benchmark reviews exist in DB
     db_benchmarks = db.query(BenchmarkReview).all()
     if db_benchmarks and len(db_benchmarks) >= 10:
         dataset = [
@@ -53,19 +55,31 @@ def get_evaluation_metrics(db: Session = Depends(get_db)):
             }
             for b in db_benchmarks
         ]
-        methodology = f"Evaluated against {len(db_benchmarks)} custom database benchmark records."
-    else:
-        dataset = BENCHMARK_FIXTURES
+        is_empirical = True
+        dataset_source = f"Empirical Database Benchmark Corpus ({len(db_benchmarks)} records)"
         methodology = (
-            f"Evaluated against {len(BENCHMARK_FIXTURES)} multi-platform validation samples. "
+            f"Evaluated against {len(db_benchmarks)} human-adjudicated review records stored in database. "
             "Metrics include Precision, Recall, Macro F1, and 3x3 Confusion Matrix."
+        )
+    else:
+        dataset = UNIT_TEST_FIXTURES
+        is_empirical = False
+        dataset_source = "Internal Unit-Test Fixtures (Non-Empirical Sanity Check)"
+        methodology = (
+            "NOTICE: No independent human-annotated research dataset has been imported yet. "
+            f"Displaying pipeline verification results on {len(UNIT_TEST_FIXTURES)} internal unit-test fixtures. "
+            "These metrics demonstrate system software execution and must NOT be cited as empirical accuracy."
         )
 
     res = run_evaluation_on_dataset(dataset)
     return FullEvaluationResponse(
         overall=res["overall"],
         per_platform=res["per_platform"],
+        calibration_ece=res.get("calibration_ece"),
+        baselines=res.get("baselines"),
         model_name=res["model_name"],
         model_version=res["model_version"],
+        is_empirical=is_empirical,
+        dataset_source=dataset_source,
         methodology=methodology
     )

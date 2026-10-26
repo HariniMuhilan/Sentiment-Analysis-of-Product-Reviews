@@ -58,6 +58,18 @@ export default function ModelEvaluationModal({ isOpen, onClose }) {
           </div>
         ) : overall ? (
           <div className="modal-body" style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Status Notice */}
+            {!evaluation.is_empirical && (
+              <div className="callout-notice glass-panel" style={{ borderLeft: '4px solid #f59e0b', background: 'rgba(245, 158, 11, 0.08)', padding: '0.9rem' }}>
+                <div style={{ fontWeight: 600, color: '#f59e0b', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                  Pipeline Verification Mode (Internal Smoke Fixtures)
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                  These metrics reflect pipeline execution against internal test fixtures. To produce validated empirical findings, human double-annotated evaluation sets must be imported.
+                </div>
+              </div>
+            )}
+
             {/* Overview Banner */}
             <div className="eval-summary-box glass-panel" style={{ background: 'rgba(15, 23, 42, 0.4)' }}>
               <div className="flex-between" style={{ flexWrap: 'wrap', gap: '1rem' }}>
@@ -77,15 +89,44 @@ export default function ModelEvaluationModal({ isOpen, onClose }) {
                     {Math.round(overall.accuracy * 100)}%
                   </div>
                 </div>
+                {evaluation.calibration_ece !== null && evaluation.calibration_ece !== undefined && (
+                  <div>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Expected Calib. Error (ECE)</span>
+                    <div style={{ fontWeight: 600, fontSize: '1.1rem', color: '#c084fc' }}>
+                      {evaluation.calibration_ece}
+                    </div>
+                  </div>
+                )}
                 <div>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Evaluation Samples</span>
-                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{overall.total_samples} records</div>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Dataset Source</span>
+                  <div style={{ fontWeight: 500, fontSize: '0.9rem' }}>{evaluation.dataset_source}</div>
                 </div>
               </div>
               <p style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                 {evaluation.methodology}
               </p>
             </div>
+
+            {/* Comparative Baselines (if present) */}
+            {evaluation.baselines && (
+              <div>
+                <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Comparative Reference Baselines</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+                  <div className="glass-panel" style={{ padding: '0.75rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Majority Class (ZeroR)</div>
+                    <div style={{ fontWeight: 600, marginTop: '0.2rem' }}>
+                      Acc: {Math.round((evaluation.baselines.majority_zero_r?.accuracy || 0) * 100)}% | F1: {Math.round((evaluation.baselines.majority_zero_r?.macro_f1 || 0) * 100)}%
+                    </div>
+                  </div>
+                  <div className="glass-panel" style={{ padding: '0.75rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Star-Rating Heuristic</div>
+                    <div style={{ fontWeight: 600, marginTop: '0.2rem' }}>
+                      Acc: {Math.round((evaluation.baselines.star_rating_heuristic?.accuracy || 0) * 100)}% | F1: {Math.round((evaluation.baselines.star_rating_heuristic?.macro_f1 || 0) * 100)}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Classification Rules */}
             <div>

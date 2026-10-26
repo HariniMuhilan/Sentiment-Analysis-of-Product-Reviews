@@ -33,9 +33,13 @@ def classify_sentiment(compound: float) -> str:
 
 def calculate_confidence(scores: Dict[str, float], compound: float) -> float:
     """
-    Computes classification confidence separate from valence:
+    Computes heuristic decision-margin intensity separate from raw valence:
     Measures how decisively the dominant sentiment class exceeds neutrality.
-    Bounded in [0.50, 1.00] for classified text.
+    
+    NOTE ON CALIBRATION:
+    This is an uncalibrated heuristic intensity score in [0.50, 1.00], NOT an
+    empirical posterior probability P(y=true | x). True probability calibration
+    requires Platt scaling or isotonic regression on annotated validation sets.
     """
     dominant_valence = max(scores.get("pos", 0.0), scores.get("neg", 0.0))
     neu = scores.get("neu", 0.0)

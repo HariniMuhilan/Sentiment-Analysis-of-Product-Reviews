@@ -1,0 +1,188 @@
+{
+  "metadata": {
+    "random_seed": 42,
+    "total_evaluation_samples": 20,
+    "classes": [
+      "POSITIVE",
+      "NEUTRAL",
+      "NEGATIVE"
+    ]
+  },
+  "models": {
+    "vader_lexical": {
+      "total_samples": 20,
+      "accuracy": 0.75,
+      "macro_f1": 0.6656,
+      "per_class": {
+        "POSITIVE": {
+          "precision": 0.7,
+          "recall": 0.875,
+          "f1_score": 0.7778,
+          "support": 8
+        },
+        "NEUTRAL": {
+          "precision": 0.5,
+          "recall": 0.2,
+          "f1_score": 0.2857,
+          "support": 5
+        },
+        "NEGATIVE": {
+          "precision": 0.875,
+          "recall": 1.0,
+          "f1_score": 0.9333,
+          "support": 7
+        }
+      },
+      "confusion_matrix": {
+        "POSITIVE": {
+          "POSITIVE": 7,
+          "NEUTRAL": 1,
+          "NEGATIVE": 0
+        },
+        "NEUTRAL": {
+          "POSITIVE": 3,
+          "NEUTRAL": 1,
+          "NEGATIVE": 1
+        },
+        "NEGATIVE": {
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 7
+        }
+      },
+      "class_distribution": {
+        "actual": {
+          "POSITIVE": 8,
+          "NEUTRAL": 5,
+          "NEGATIVE": 7
+        },
+        "predicted": {
+          "NEUTRAL": 2,
+          "POSITIVE": 10,
+          "NEGATIVE": 8
+        }
+      },
+      "expected_calibration_error": 0.1036
+    },
+    "majority_zero_r": {
+      "total_samples": 20,
+      "accuracy": 0.4,
+      "macro_f1": 0.1905,
+      "per_class": {
+        "POSITIVE": {
+          "precision": 0.4,
+          "recall": 1.0,
+          "f1_score": 0.5714,
+          "support": 8
+        },
+        "NEUTRAL": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1_score": 0.0,
+          "support": 5
+        },
+        "NEGATIVE": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1_score": 0.0,
+          "support": 7
+        }
+      },
+      "confusion_matrix": {
+        "POSITIVE": {
+          "POSITIVE": 8,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0
+        },
+        "NEUTRAL": {
+          "POSITIVE": 5,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0
+        },
+        "NEGATIVE": {
+          "POSITIVE": 7,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0
+        }
+      },
+      "class_distribution": {
+        "actual": {
+          "POSITIVE": 8,
+          "NEUTRAL": 5,
+          "NEGATIVE": 7
+        },
+        "predicted": {
+          "POSITIVE": 20
+        }
+      },
+      "majority_class": "POSITIVE"
+    },
+    "star_rating_heuristic": {
+      "total_samples": 20,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "per_class": {
+        "POSITIVE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 8
+        },
+        "NEUTRAL": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 5
+        },
+        "NEGATIVE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 7
+        }
+      },
+      "confusion_matrix": {
+        "POSITIVE": {
+          "POSITIVE": 8,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0
+        },
+        "NEUTRAL": {
+          "POSITIVE": 0,
+          "NEUTRAL": 5,
+          "NEGATIVE": 0
+        },
+        "NEGATIVE": {
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 7
+        }
+      },
+      "class_distribution": {
+        "actual": {
+          "POSITIVE": 8,
+          "NEUTRAL": 5,
+          "NEGATIVE": 7
+        },
+        "predicted": {
+          "POSITIVE": 8,
+          "NEUTRAL": 5,
+          "NEGATIVE": 7
+        }
+      }
+    }
+  },
+  "rating_text_divergence": {
+    "total_rated_reviews": 20,
+    "aligned_count": 15,
+    "divergent_count": 0,
+    "divergence_rate": 0.0,
+    "high_rating_negative_text": 0,
+    "low_rating_positive_text": 0,
+    "neutral_rating_breakdown": {
+      "NEUTRAL": 1,
+      "NEGATIVE": 1,
+      "POSITIVE": 3
+    }
+  }
+}

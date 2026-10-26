@@ -49,8 +49,6 @@ def parse_amazon_record(row: Dict[str, str]) -> Dict[str, Any] | None:
         return None
     
     rating = parse_rating(row.get("star_rating") or row.get("rating"))
-    if rating is None:
-        rating = 3.0 # Default neutral mid-point if unrated
 
     return {
         "external_id": row.get("review_id"),
@@ -72,8 +70,6 @@ def parse_flipkart_record(row: Dict[str, str]) -> Dict[str, Any] | None:
         return None
     
     rating = parse_rating(row.get("rating") or row.get("Rate") or row.get("Rating"))
-    if rating is None:
-        rating = 3.0
 
     return {
         "external_id": row.get("review_id") or row.get("id"),
@@ -95,8 +91,6 @@ def parse_myntra_record(row: Dict[str, str]) -> Dict[str, Any] | None:
         return None
     
     rating = parse_rating(row.get("rating") or row.get("Rating"))
-    if rating is None:
-        rating = 3.0
 
     return {
         "external_id": row.get("review_id"),
@@ -118,8 +112,6 @@ def parse_meesho_record(row: Dict[str, str]) -> Dict[str, Any] | None:
         return None
     
     rating = parse_rating(row.get("rating") or row.get("Rating") or row.get("star_rating"))
-    if rating is None:
-        rating = 3.0
 
     return {
         "external_id": row.get("review_id"),
@@ -151,8 +143,6 @@ def parse_generic_record(row: Dict[str, str], default_platform: str = "amazon") 
     ).strip().lower()
 
     rating = parse_rating(row.get("rating") or row.get("star_rating") or row.get("rate"))
-    if rating is None:
-        rating = 3.0
 
     return {
         "external_id": row.get("external_id") or row.get("review_id") or row.get("id"),

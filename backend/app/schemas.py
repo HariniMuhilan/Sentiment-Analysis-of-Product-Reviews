@@ -61,8 +61,14 @@ class PlatformStats(BaseSchema):
 class StatisticalComparison(BaseSchema):
     leader_platform: Optional[str] = None
     is_statistically_significant: bool = False
+    test_method: str = "Pearson Chi-Square & Two-Proportion Z-Test"
+    test_statistic: Optional[float] = None
+    p_value: Optional[float] = None
+    effect_size: Optional[float] = None
+    effect_size_type: Optional[str] = None
     explanation: str
     sample_size_adequate: bool
+    confounder_warning: Optional[str] = None
 
 class DataCoverage(BaseSchema):
     platforms_with_data: List[str]
@@ -91,7 +97,7 @@ class ReviewItem(BaseSchema):
     category: Optional[str]
     headline: Optional[str]
     review_text: str
-    rating: float
+    rating: Optional[float] = None
     helpful_votes: int
     review_date: Optional[datetime]
     sentiment: str
@@ -125,6 +131,10 @@ class EvaluationReport(BaseSchema):
 class FullEvaluationResponse(BaseSchema):
     overall: EvaluationReport
     per_platform: Dict[str, EvaluationReport]
+    calibration_ece: Optional[float] = None
+    baselines: Optional[Dict[str, Any]] = None
     model_name: str
     model_version: str
+    is_empirical: bool = False
+    dataset_source: str
     methodology: str

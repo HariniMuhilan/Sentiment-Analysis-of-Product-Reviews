@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "project": "Sentiment Analysis of Product Reviews",
+  "manifest_version": "1.0.0",
+  "generated_at": "2026-10-26T11:18:00Z",
+  "datasets": [
+    {
+      "id": "DEMO-FIXTURE-43",
+      "name": "Synthetic Demonstration Dataset",
+      "relative_path": "Datasets/sample_authorized_reviews.csv",
+      "sha256": "9ff8ffdc091a2af0e7d11796ccb6787ad8c4850c7f38cc04f384fc4b9f678edc",
+      "type": "synthetic_demo",
+      "purpose": "Unit testing, system integration, UI rendering validation",
+      "verified_license": "CC0-1.0 (Public Domain Dedication)",
+      "empirical_status": "EXCLUDED_FROM_EMPIRICAL_STUDY",
+      "record_count": 43,
+      "columns": [
+        "external_id",
+        "platform",
+        "product_name",
+        "category",
+        "rating",
+        "headline",
+        "review_text",
+        "review_date",
+        "helpful_votes"
+      ]
+    },
+    {
+      "id": "AMAZON-MARC-EN",
+      "name": "Multilingual Amazon Reviews Corpus (English Subset)",
+      "relative_path": "Datasets/research/amazon_marc_en_sample.jsonl",
+      "type": "research_benchmark",
+      "purpose": "Empirical baseline validation and rating-text divergence evaluation",
+      "provider": "Amazon Science (Keung et al., 2020)",
+      "verified_license": "CC-BY-4.0",
+      "empirical_status": "VERIFIED_ACADEMIC_CORPUS",
+      "source_url": "https://huggingface.co/datasets/amazon_reviews_multi"
+    },
+    {
+      "id": "FLIPKART-RESEARCH-PENDING",
+      "name": "Flipkart Product Customer Reviews",
+      "relative_path": "Datasets/Flipkart/",
+      "type": "external_marketplace",
+      "purpose": "Cross-platform comparative sentiment study",
+      "provider": "Flipkart Internet Pvt. Ltd.",
+      "verified_license": "NONE_VERIFIED",
+      "empirical_status": "BLOCKED_PENDING_PLATFORM_AUTHORIZATION",
+      "blocker_reason": "Automated web scraping is prohibited under Flipkart Terms of Use (Section 10). Public Kaggle uploads lack authorized redistribution rights."
+    },
+    {
+      "id": "MYNTRA-RESEARCH-PENDING",
+      "name": "Myntra Fashion Reviews",
+      "relative_path": "Datasets/Myntra/",
+      "type": "external_marketplace",
+      "purpose": "Fashion/Apparel domain sentiment analysis",
+      "provider": "Myntra Designs Pvt. Ltd.",
+      "verified_license": "NONE_VERIFIED",
+      "empirical_status": "BLOCKED_PENDING_PLATFORM_AUTHORIZATION",
+      "blocker_reason": "Myntra Terms of Service prohibit third-party crawling. Awaiting institutional data agreement."
+    },
+    {
+      "id": "MEESHO-RESEARCH-PENDING",
+      "name": "Meesho Product Reviews",
+      "relative_path": "Datasets/Meesho/",
+      "type": "external_marketplace",
+      "purpose": "Social commerce customer sentiment evaluation",
+      "provider": "Fashnear Technologies Pvt. Ltd.",
+      "verified_license": "NONE_VERIFIED",
+      "empirical_status": "BLOCKED_PENDING_PLATFORM_AUTHORIZATION",
+      "blocker_reason": "No public open access license available. Awaiting verified platform access."
+    }
+  ]
+}

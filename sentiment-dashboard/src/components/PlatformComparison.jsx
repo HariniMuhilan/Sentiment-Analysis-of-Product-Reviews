@@ -41,15 +41,34 @@ export default function PlatformComparison({ analysis }) {
           )}
           <span className="callout-title">
             {statistical_comparison.is_statistically_significant 
-              ? `Statistically Significant Leader: ${statistical_comparison.leader_platform}`
-              : 'Statistical Comparison & Uncertainty Notice'}
+              ? `Two-Proportion Z-Test Finding: ${statistical_comparison.leader_platform}`
+              : 'Statistical Comparison & Hypothesis Test Evaluation'}
           </span>
         </div>
         <p className="callout-text">{statistical_comparison.explanation}</p>
+        
+        {statistical_comparison.test_statistic !== null && statistical_comparison.test_statistic !== undefined && (
+          <div className="test-metrics-pills flex-center" style={{ gap: '0.75rem', flexWrap: 'wrap', margin: '0.5rem 0', fontSize: '0.75rem' }}>
+            <span className="badge-subtle">Method: {statistical_comparison.test_method}</span>
+            <span className="badge-subtle">z-statistic: {statistical_comparison.test_statistic}</span>
+            <span className="badge-subtle">p-value: {statistical_comparison.p_value}</span>
+            {statistical_comparison.effect_size && (
+              <span className="badge-subtle">Effect Size ({statistical_comparison.effect_size_type}): {statistical_comparison.effect_size}</span>
+            )}
+          </div>
+        )}
+
+        {statistical_comparison.confounder_warning && (
+          <div className="callout-footer flex-center" style={{ gap: '0.4rem', color: '#f59e0b', fontSize: '0.8rem', marginTop: '0.5rem', alignItems: 'flex-start' }}>
+            <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <span>{statistical_comparison.confounder_warning}</span>
+          </div>
+        )}
+
         {!statistical_comparison.sample_size_adequate && (
-          <div className="callout-footer flex-center" style={{ gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+          <div className="callout-footer flex-center" style={{ gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.4rem' }}>
             <AlertCircle size={14} />
-            <span>Rigorous leader ranking requires N ≥ 30 per platform with non-overlapping confidence intervals.</span>
+            <span>Hypothesis testing requires adequate sample sizes (N ≥ 30 per group) to fulfill asymptotic normality assumptions.</span>
           </div>
         )}
       </div>

@@ -41,7 +41,7 @@ class Review(Base):
     category = Column(String(100), nullable=True, index=True)
     headline = Column(String(500), nullable=True)
     review_text = Column(Text, nullable=False)
-    rating = Column(Float, nullable=False, index=True)
+    rating = Column(Float, nullable=True, index=True)
     helpful_votes = Column(Integer, default=0)
     review_date = Column(DateTime, nullable=True, index=True)
 

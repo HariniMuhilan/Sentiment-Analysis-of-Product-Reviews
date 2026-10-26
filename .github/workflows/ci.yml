@@ -31,6 +31,10 @@ jobs:
           cd backend
           pytest -v
 
+      - name: Verify research pipeline & experiment runner
+        run: |
+          python research/run_experiments.py
+
   frontend-build:
     name: Frontend Build & Linting
     runs-on: ubuntu-latest
