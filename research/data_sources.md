@@ -30,6 +30,8 @@ The repository's `.gitignore` excludes downloaded JSONL files and SQLite databas
 
 The repository now contains a separate Olist Brazil corpus under CC BY-NC-SA 4.0. It is not yet imported into the application's Amazon database. A reproducible preparation script filters to text-bearing reviews from single-distinct-product orders, producing 40,317 records from the 99,224 source order-review rows. Product IDs are internal to Olist and cannot be joined to Amazon product models. Portuguese text must be analyzed with a suitable Portuguese-capable model; the current VADER output is not valid evidence for it. See [`Datasets/OlistBrazilianEcommerce/README.md`](../Datasets/OlistBrazilianEcommerce/README.md) and the manifest for details.
 
+The repository also contains a privacy-minimized derivative of **B2W-Reviews01**, an Americanas.com product-review corpus under CC BY-NC-SA 4.0. It retains 132,301 reviews and their product/category metadata while removing reviewer ID and demographic columns. It is not loaded into the main Amazon database. Portuguese text is outside the validated coverage of the current VADER model, and same-product cross-platform matching is not established. See [`Datasets/B2WReviews01/README.md`](../Datasets/B2WReviews01/README.md).
+
 ## Research limitations
 
 - The active data is from one marketplace, so it cannot support cross-platform comparisons.

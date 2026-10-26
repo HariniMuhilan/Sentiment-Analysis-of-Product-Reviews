@@ -1,7 +1,7 @@
 {
   "project": "Sentiment Analysis Review",
   "manifest_version": "2.0.0",
-  "generated_at": "2026-10-26T15:51:29+00:00",
+  "generated_at": "2026-10-26T15:55:56+00:00",
   "local_research_database": {
     "path": "backend/sentiment_research.db",
     "review_count": 2797473,
@@ -122,6 +122,44 @@
         "CC BY-NC-SA terms apply to data and derivatives; the repository's MIT code license does not replace them."
       ],
       "attribution": "Olist and collaborators. Brazilian E-Commerce Public Dataset by Olist. Kaggle. CC BY-NC-SA 4.0. https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce"
+    },
+    {
+      "id": "B2W-REVIEWS01-AMERICANAS-2018",
+      "name": "B2W-Reviews01 product reviews",
+      "type": "supplementary_marketplace_review_corpus",
+      "provider": "B2W Digital / Americanas Tech",
+      "source_url": "https://github.com/americanas-tech/b2w-reviews01",
+      "license": "CC BY-NC-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "downloaded_at": "2026-10-26",
+      "source_platform": "Americanas.com (Brazil)",
+      "country": "Brazil",
+      "language": "Brazilian Portuguese",
+      "collection_period": "2018-01 through 2018-05",
+      "source_rows": 132373,
+      "prepared_written_review_rows": 132301,
+      "excluded_without_review_text": 72,
+      "excluded_invalid_rating": 0,
+      "prepared_data_path": "Datasets/B2WReviews01/processed/B2W-Reviews01-clean.csv.gz",
+      "preparation_script": "research/prepare_b2w_reviews.py",
+      "prepared_into_main_database": false,
+      "source_sha256": "821FB0BF9F7230B0FBA4E4F9FADD75A66D1A9FF0B1657810791D33007EB2AB38",
+      "prepared_sha256": "EBE68EBA867F3FBB7287F4F70466F98E86F2B597D2083A33BF30D6D27F4F0810",
+      "removed_fields": [
+        "reviewer_id",
+        "reviewer_birth_year",
+        "reviewer_gender",
+        "reviewer_state"
+      ],
+      "limitations": [
+        "Source collection is historical (2018), not current listings or prices.",
+        "Portuguese text is not validated for the application English-oriented VADER model.",
+        "Ratings and recommendation responses are observed signals, not human-annotated text sentiment.",
+        "Product identifiers are internal to Americanas; cross-platform model matching has not been established.",
+        "Some review text may concern purchase, payment, or delivery experience.",
+        "CC BY-NC-SA conditions apply to corpus and derivatives; repository MIT code license does not replace them."
+      ],
+      "attribution": "B2W Digital. B2W-Reviews01. Americanas Tech GitHub repository. CC BY-NC-SA 4.0. https://github.com/americanas-tech/b2w-reviews01"
     }
   ],
   "not_included": [

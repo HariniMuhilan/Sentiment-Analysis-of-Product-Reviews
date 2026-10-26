@@ -5,14 +5,15 @@
 
 ## Decision
 
-No additional raw review text was imported during this audit. Several datasets are publicly downloadable and carry a dataset-level license, but the available records do not establish that the dataset publishers had rights to sublicense the underlying marketplace user reviews. This matters especially where the marketplace terms prohibit automated collection or data mining. Keep these sources out of the empirical database until the rights position is documented or the relevant marketplace grants permission.
+Only sources with a named platform, documented provenance, and a stated corpus license were added as separate supplementary datasets. Public downloads from other sources may carry a dataset-level license without establishing that the publisher had rights to sublicense underlying marketplace reviews. This matters especially where platform terms prohibit automated collection or data mining. Keep those sources out of the empirical database until the rights position is documented or the relevant marketplace grants permission.
 
-The currently imported Amazon Reviews 2023 corpus remains the only active source. Its curators say they cannot assign a license and provide it primarily for research, so the existing local-only handling and restrictions remain in place.
+Amazon Reviews 2023 remains the only corpus loaded into the application database. Its curators say they cannot assign a license and provide it primarily for research, so the existing local-only handling and restrictions remain in place. Olist and B2W-Reviews01 are separate supplementary research files, not merged into Amazon data.
 
 ## Candidate sources
 
 | Source | Public availability and reported size | Research fit | Clearance outcome |
 |---|---|---|---|
+| B2W-Reviews01 (Americanas.com) | Official Americanas Tech repository; over 130,000 real product reviews from Jan–May 2018; CC BY-NC-SA 4.0. | Named Brazilian platform, Portuguese review text, product names/IDs, category, dates, ratings, and recommendation label. | **Included as a supplementary corpus.** A derivative retaining 132,301 text-bearing rows and dropping reviewer ID/demographics is tracked. Use a Portuguese-capable model; treat cross-site product matching as unverified absent a documented match protocol. |
 | Olist Brazilian E-Commerce Public Dataset | Olist-published Kaggle dataset, 99,224 order-review rows, 2016–2018; CC BY-NC-SA 4.0. | Named Brazilian e-commerce source with review text, ratings, product IDs, and categories. Product title is absent; reviews attach to orders, not directly to products. | **Included as a supplementary corpus.** The preparation script yields 40,317 written reviews linked to a single distinct product. Keep separate from the main Amazon corpus; Portuguese VADER scores are unsupported and product models cannot be matched across retailers. |
 | Pandey et al., Amazon + Flipkart + Myntra | The paper reports 23,664 collected reviews (15,432 after deduplication) from four categories; data is available on request, not as a direct public download. | Best match to the intended India-focused marketplace comparison. Product-level matching coverage still needs to be verified. | **Request access and written reuse terms.** Authors report following platform terms, but the dataset and reuse license are not publicly available. Do not imply permission has been granted. |
 | Rashid et al., Daraz + Pickaboo | Public Mendeley Data record, CC BY 4.0; paper reports 78,130 samples across 152 product categories and manually annotated sentiment/emotion. | Actual product-review text from two platforms; Bengali and English. Potential external-market validation, but platform, country, and language differ from the current Amazon corpus. | **Hold pending rights clarification.** Mendeley’s license notice says additional permission may be needed for third-party content. Daraz terms prohibit data-mining/robots and downloading or copying site content. |
@@ -51,6 +52,8 @@ The currently imported Amazon Reviews 2023 corpus remains the only active source
 - Olist Brazilian E-Commerce Public Dataset (Kaggle; CC BY-NC-SA 4.0): <https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce>
 - Olist retrieval mirror used for the four source tables: <https://github.com/ductransponster/olist-brazilian-ecommerce>
 - Synthetic Customer Sentiment Dataset (Kaggle): <https://www.kaggle.com/datasets/kundanbedmutha/customer-sentiment-dataset>
+- B2W-Reviews01 official source and license: <https://github.com/americanas-tech/b2w-reviews01>
+- B2W-Reviews01 associated paper PDF linked from the official source repository: <https://github.com/americanas-tech/b2w-reviews01/blob/main/b2wreviews01_stil2019.pdf>
 
 ## Next clearance step
 

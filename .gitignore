@@ -47,6 +47,11 @@ Datasets/OlistBrazilianEcommerce/raw/*
 !Datasets/OlistBrazilianEcommerce/raw/olist_order_items_dataset.csv
 !Datasets/OlistBrazilianEcommerce/raw/olist_products_dataset.csv
 !Datasets/OlistBrazilianEcommerce/raw/product_category_name_translation.csv
+!Datasets/B2WReviews01/
+Datasets/B2WReviews01/raw/
+!Datasets/B2WReviews01/processed/
+Datasets/B2WReviews01/processed/*
+!Datasets/B2WReviews01/processed/B2W-Reviews01-clean.csv.gz
 !Datasets/OlistBrazilianEcommerce/
 !Datasets/OlistBrazilianEcommerce/raw/
 Datasets/OlistBrazilianEcommerce/raw/*
