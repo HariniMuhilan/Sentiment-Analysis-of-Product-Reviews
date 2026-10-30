@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg?logo=python&logoColor=white)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An end-to-end product review sentiment analysis application and reproducible research framework. The main searchable product corpus contains historical Amazon reviews from the UCSD McAuley Lab Amazon Reviews 2023 dataset in the All Beauty and Appliances categories. A separate, human-annotated RePro benchmark from Americanas.com is available for model evaluation, alongside supplementary Olist and B2W research files. The current English-oriented VADER model is not validated for Portuguese, and these datasets do not establish matched-product cross-marketplace results or live prices.
+An end-to-end product review sentiment analysis application and reproducible research framework. The main searchable product corpus contains historical Amazon reviews from the UCSD McAuley Lab Amazon Reviews 2023 dataset in the All Beauty and Appliances categories. Separate research files include RePro, Brazilian Olist and B2W corpora, a small five-retailer smart-device benchmark, and a Bengali multilingual review benchmark. These datasets have different languages, sampling frames, and identifiers; they are kept separate from the searchable Amazon database. See [`Datasets/README.md`](Datasets/README.md) for sources, reuse terms, and limitations.
 
 ---
 

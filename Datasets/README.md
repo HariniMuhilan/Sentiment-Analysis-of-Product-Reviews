@@ -2,15 +2,15 @@
 
 ## Amazon Reviews 2023 (UCSD McAuley Lab)
 
-The local research database is populated from the **All_Beauty** and **Appliances** category files in the Amazon Reviews 2023 corpus. The two source files contained 2,830,133 rows; deterministic duplicate checks imported **2,797,473 unique reviews** and skipped 33,660 repeated rows. The database contains 112,578 Beauty products and 94,318 Appliances products. Category-level counts and source-file SHA-256 hashes are recorded in `research/data_manifest.json`.
+The local database contains **2,797,473 unique Amazon Reviews 2023 reviews** from the **All_Beauty** and **Appliances** categories, plus **2,370** smart-device reviews from the cross-retailer Virtual Assistant Devices benchmark. Its current total is 2,799,843 reviews. The Amazon source files contained 2,830,133 rows; deterministic duplicate checks skipped 33,660 repeats. Dataset and database counts and SHA-256 hashes are recorded in `research/data_manifest.json`.
 
 - Dataset page and downloads: <https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023>
 - Dataset paper: Hou et al., *Bridging Language and Items for Retrieval and Recommendation* (2024), <https://arxiv.org/abs/2403.03952>
 - Source collection period: May 1996 through September 2023; records are historical, not live marketplace data.
 - Curator's licensing statement: no license is assigned by the curators; the files are provided primarily for research. Use only for research after reviewing the source terms and applicable law. Do not publish or redistribute the raw corpus or a database containing its review text without permission.
-- These records represent Amazon only. They do not provide cross-retailer reviews, current stock, or current prices. Item metadata prices are often missing and are historical; they must not be presented as current prices.
+- The Amazon records represent Amazon only. Cross-retailer reviews come from the separate Virtual Assistant Devices dataset documented below. Neither source provides current stock or current prices. Item metadata prices are often missing and are historical; they must not be presented as current prices.
 
-The downloaded review text and item metadata are stored under `Datasets/research/raw/`. `.gitignore` excludes these files and the local SQLite database. Keep them local and do not commit or push them to GitHub.
+The Amazon review text and item metadata are stored under `Datasets/research/raw/`. `.gitignore` excludes these files and the local SQLite database. Keep the Amazon files and database local; do not commit or push them to GitHub.
 
 ## Download the research files
 
@@ -54,3 +54,20 @@ The reviews are primarily Portuguese, so the current VADER model must not be tre
 ## Americanas.com / B2W-Reviews01
 
 The repository also includes a cleaned derivative of the real B2W-Reviews01 product-review corpus: **132,301** text-bearing reviews from Americanas.com, with product IDs/names, categories, 1–5 ratings, and review dates. Its CC BY-NC-SA 4.0 source is published by B2W Digital through the Americanas Tech repository. Reviewer IDs and demographic fields are omitted from the included derivative. The current VADER model is not validated for Portuguese. The related **RePro** dataset adds 10,003 released, human-annotated records from the B2W corpus; 7,985 single-polarity rows form a three-class evaluation subset, while 2,018 mixed reviews are preserved separately. Since RePro overlaps B2W, do not count it as additional independent review volume. See [`B2WReviews01/README.md`](B2WReviews01/README.md) for citation, preparation, benchmark loading, and licensing details.
+
+## Additional human-labeled review benchmarks
+
+Two separately licensed datasets have been added as source spreadsheets with reproducible CSV derivatives:
+
+- **Virtual Assistant Devices:** 2,370 labeled reviews from Amazon, Best Buy, eBay, Target, and Walmart; ten smart-device models, with five represented on at least two platforms. The Mendeley record lists CC BY 4.0. The downloaded file's negative/neutral counts differ from the paper and dataset description, so do not use it as gold evaluation data until clarified. Details: [`VirtualAssistantDevices/README.md`](VirtualAssistantDevices/README.md).
+- **BanglaEcomReviewCorpus:** 8,685 labeled Bangla reviews with English translations, collected across several Bangladesh commerce sites. The Mendeley record lists CC BY 4.0. The released rows omit platform and product identifiers, so this is an external multilingual sentiment benchmark, not a platform-comparison corpus. Details: [`BanglaEcomReviewCorpus/README.md`](BanglaEcomReviewCorpus/README.md).
+
+Regenerate both normalized CSV files and their SHA-256 summary from the checked-in spreadsheets with:
+
+```powershell
+python research/prepare_external_benchmarks.py
+```
+
+Keep these corpora distinct by dataset in analysis; they have different languages, sampling processes, platform metadata, and label provenance.
+
+The Virtual Assistant Devices reviews are loaded into the local searchable database, where the application's VADER model generates its analysis labels. The source human labels remain in the separate CSV and are not used as model predictions. The Bangla corpus remains a separate benchmark because its source file has no row-level retailer/product identity and the application's current sentiment model is English-oriented.

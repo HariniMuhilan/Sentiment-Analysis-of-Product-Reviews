@@ -1,15 +1,23 @@
 {
   "project": "Sentiment Analysis Review",
-  "manifest_version": "2.0.0",
-  "generated_at": "2026-10-26T16:06:16Z",
+  "manifest_version": "3.0.0",
+  "generated_at": "2026-10-30T17:00:00Z",
   "local_research_database": {
     "path": "backend/sentiment_research.db",
-    "review_count": 2797473,
-    "product_count": 206896,
-    "source_platform": "amazon_ucsd_2023",
+    "review_count": 2799843,
+    "product_count": 206906,
+    "source_platform": "amazon_ucsd_2023 + virtual_assistant_devices",
     "benchmark_review_count": 7985,
     "benchmark_dataset": "RePro-2024-single-polarity",
-    "excluded_from_git": true
+    "excluded_from_git": true,
+    "additional_source_platform_counts": {
+      "Amazon generic import (Virtual Assistant dataset)": 669,
+      "Best Buy": 855,
+      "eBay": 21,
+      "Target": 424,
+      "Walmart": 401
+    },
+    "virtual_assistant_dataset_review_count": 2370
   },
   "datasets": [
     {
@@ -213,6 +221,117 @@
         "CC BY-NC-SA conditions apply to this corpus and derivatives; repository MIT code license does not replace them."
       ],
       "attribution": "dos Santos Silva et al. (2024). RePro: a benchmark for Opinion Mining for Brazilian Portuguese. PROPOR, pp. 432-440. Credit B2W Digital as required by the dataset notice. CC BY-NC-SA 4.0. https://github.com/lucasnil/repro"
+    },
+    {
+      "id": "VIRTUAL-ASSISTANT-DEVICES-2023",
+      "name": "Virtual Assistant Devices Dataset",
+      "type": "human_annotated_cross_retailer_review_benchmark",
+      "provider": "Yaser Alhasawi and Salem Alghamdi; Mendeley Data",
+      "source_url": "https://data.mendeley.com/datasets/d5vsgcxrk5/1",
+      "paper_url": "https://doi.org/10.1016/j.dib.2024.110642",
+      "version": "1",
+      "license": "CC BY 4.0 (as stated by the Mendeley dataset record)",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "downloaded_at": "2026-10-30",
+      "language": "English",
+      "source_platforms": [
+        "Amazon",
+        "BestBuy",
+        "Ebay",
+        "Target",
+        "Walmart"
+      ],
+      "source_rows": 2370,
+      "prepared_rows": 2370,
+      "product_count": 10,
+      "products_on_multiple_platforms": 5,
+      "sentiment_counts_in_downloaded_file": {
+        "positive": 842,
+        "negative": 774,
+        "neutral": 754
+      },
+      "source_reported_sentiment_counts": {
+        "positive": 842,
+        "negative": 800,
+        "neutral": 728
+      },
+      "source_file": {
+        "path": "Datasets/VirtualAssistantDevices/raw/Virtual_Assistant_Devices_Dataset.xlsx",
+        "sha256": "7625ec57846d671f21de8c4df69c4e348e04864eaac378d8cb2a3353d661480d"
+      },
+      "prepared_file": {
+        "path": "Datasets/VirtualAssistantDevices/processed/virtual_assistant_reviews.csv",
+        "sha256": "d25108799251a563a43b6859b6f7aebdbc97681411ca4ed2f35842791b8ea774"
+      },
+      "preparation_script": "research/prepare_external_benchmarks.py",
+      "included_in_searchable_database": true,
+      "rights_status": "Mendeley dataset record lists CC BY 4.0. The associated paper reports that platform redistribution policies were followed.",
+      "use_policy": "Keep separate from the main Amazon corpus. Do not use as a gold evaluation set until the source label-count discrepancy is resolved. Attribute authors and dataset; identify project normalization.",
+      "limitations": [
+        "The downloaded spreadsheet label totals disagree with the paper and dataset record (negative 774 vs 800; neutral 754 vs 728).",
+        "No numeric star ratings or review dates are present.",
+        "Only five of ten device models have reviews from more than one retailer; cross-retailer sample sizes are uneven.",
+        "Historical collection (2018–2023); not live reviews or current prices."
+      ],
+      "attribution": "Alhasawi, Yaser; Alghamdi, Salem (2023), Virtual Assistant Devices Dataset, Mendeley Data, V1, DOI: 10.17632/d5vsgcxrk5.1, CC BY 4.0.",
+      "ingested_review_count": 2370,
+      "app_sentiment_labels_are_model_predictions": true,
+      "platform_counts_in_local_database": {
+        "Amazon": 669,
+        "BestBuy": 855,
+        "Ebay": 21,
+        "Target": 424,
+        "Walmart": 401
+      }
+    },
+    {
+      "id": "BANGLA-ECOM-REVIEW-CORPUS-2025-V2",
+      "name": "BanglaEcomReviewCorpus: A Resource for E-Commerce Product Review Sentiment Analysis",
+      "type": "human_annotated_multilingual_external_sentiment_benchmark",
+      "provider": "Umme Ayman, Taslima Akter, Md. Tanvir Ahmed Akash, and Saiham Zaman Mridul; Mendeley Data",
+      "source_url": "https://data.mendeley.com/datasets/kkzfrvhbhp/2",
+      "paper_url": "https://doi.org/10.1016/j.dib.2026.112663",
+      "version": "2",
+      "license": "CC BY 4.0 (as stated by the Mendeley dataset record and open-access article)",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "downloaded_at": "2026-10-30",
+      "language": "Bangla; source file also provides English translations",
+      "source_platforms_reported_in_paper": [
+        "Daraz",
+        "Bikroy.com",
+        "Pickaboo",
+        "Shajgoj",
+        "other sites"
+      ],
+      "platform_name_available_per_row": false,
+      "product_id_available_per_row": false,
+      "source_rows": 8685,
+      "prepared_rows": 8685,
+      "sentiment_counts": {
+        "positive": 3012,
+        "negative": 2881,
+        "neutral": 2792
+      },
+      "rows_with_english_translation": 8685,
+      "source_file": {
+        "path": "Datasets/BanglaEcomReviewCorpus/raw/BanglaEcomReviewCorpus.xlsx",
+        "sha256": "bfdbdb293559c708e1acba6220e15022cf2554a88eca973035c3f927195bfadd"
+      },
+      "prepared_file": {
+        "path": "Datasets/BanglaEcomReviewCorpus/processed/bangla_ecom_reviews.csv",
+        "sha256": "012cb44c3671003e69fcd1e3e11b0e332f92d14b9e236068bd6d51912967c7f1"
+      },
+      "preparation_script": "research/prepare_external_benchmarks.py",
+      "included_in_searchable_database": false,
+      "rights_status": "Mendeley dataset record lists CC BY 4.0; associated data article is open access under CC BY.",
+      "use_policy": "Use as a separate Bangla sentiment benchmark with attribution. Do not use for platform comparisons or matched-product analysis because row-level platform and product identifiers are absent.",
+      "limitations": [
+        "Marketplace sources are described at corpus level only, not per review row.",
+        "No product name or product identifier is included.",
+        "English translation method is not sufficiently documented to treat translations as English gold data.",
+        "Use a Bangla-capable model; VADER scores on original Bangla are not valid evidence."
+      ],
+      "attribution": "Ayman, Umme; Akter, Taslima; Akash, Md. Tanvir Ahmed; Mridul, Saiham Zaman (2025), BanglaEcomReviewCorpus: A Resource for E-Commerce Product Review Sentiment Analysis, Mendeley Data, V2, DOI: 10.17632/kkzfrvhbhp.2, CC BY 4.0."
     }
   ],
   "not_included": [

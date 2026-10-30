@@ -34,6 +34,34 @@ PLATFORM_DEFINITIONS = [
         "description": "Provider-specific research data is not included or configured.",
         "source_info": "No authorized Meesho review data is currently loaded.",
         "terms_info": "Import only after obtaining and documenting appropriate provider authorization."
+    },
+    {
+        "code": "bestbuy",
+        "name": "Best Buy",
+        "description": "Retailer source represented in the Virtual Assistant Devices research dataset.",
+        "source_info": "Virtual Assistant Devices Dataset, Mendeley Data, DOI: 10.17632/d5vsgcxrk5.1.",
+        "terms_info": "Dataset record lists CC BY 4.0; cite the dataset authors and source."
+    },
+    {
+        "code": "ebay",
+        "name": "eBay",
+        "description": "Retailer source represented in the Virtual Assistant Devices research dataset.",
+        "source_info": "Virtual Assistant Devices Dataset, Mendeley Data, DOI: 10.17632/d5vsgcxrk5.1.",
+        "terms_info": "Dataset record lists CC BY 4.0; cite the dataset authors and source."
+    },
+    {
+        "code": "target",
+        "name": "Target",
+        "description": "Retailer source represented in the Virtual Assistant Devices research dataset.",
+        "source_info": "Virtual Assistant Devices Dataset, Mendeley Data, DOI: 10.17632/d5vsgcxrk5.1.",
+        "terms_info": "Dataset record lists CC BY 4.0; cite the dataset authors and source."
+    },
+    {
+        "code": "walmart",
+        "name": "Walmart",
+        "description": "Retailer source represented in the Virtual Assistant Devices research dataset.",
+        "source_info": "Virtual Assistant Devices Dataset, Mendeley Data, DOI: 10.17632/d5vsgcxrk5.1.",
+        "terms_info": "Dataset record lists CC BY 4.0; cite the dataset authors and source."
     }
 ]
 
@@ -155,7 +183,7 @@ def import_records_from_stream(
             review_text=rec["review_text"],
             rating=rec.get("rating"), # Preserves None if unrated
             helpful_votes=rec.get("helpful_votes", 0),
-            review_date=rec.get("review_date") or datetime.now(timezone.utc),
+            review_date=rec.get("review_date"),
             sentiment=sentiment_res["sentiment"],
             compound_score=sentiment_res["compound_score"],
             positive_score=sentiment_res["positive_score"],
