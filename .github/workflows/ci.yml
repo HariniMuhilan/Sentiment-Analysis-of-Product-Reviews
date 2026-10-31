@@ -31,9 +31,9 @@ jobs:
           cd backend
           pytest -v
 
-      - name: Verify research pipeline & experiment runner
+      - name: Verify prepared human-labeled research benchmark
         run: |
-          python research/run_experiments.py
+          python research/run_repro_benchmark.py
 
   frontend-build:
     name: Frontend Build & Linting
