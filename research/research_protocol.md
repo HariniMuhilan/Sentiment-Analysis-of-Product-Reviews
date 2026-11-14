@@ -11,13 +11,13 @@
 ### Primary Research Questions
 - **RQ1 (Empirical Validity of Rule-Based Lexical Sentiment)**: How reliably does an unsupervised, rule-based lexical classifier (VADER) classify e-commerce product review sentiment into Positive, Neutral, and Negative categories when evaluated against independent, double-annotated human ground truth?
 - **RQ2 (Star Rating vs. Text Sentiment Divergence)**: How frequently and under what circumstances do numerical star ratings (1–5) diverge from semantic text sentiment, and does treating star ratings as pseudo-labels introduce systematic measurement error?
-- **RQ3 (Within-Amazon Domain Variation)**: How do rating-text agreement and VADER sentiment distributions differ between the included All Beauty and Appliances domains, and how are those differences associated with review length, rating, and review period?
+- **RQ3 (Within-Amazon Domain Variation)**: How do rating-text agreement and VADER sentiment distributions differ across All Beauty, Appliances, and the popularity-selected Electronics subset, and how are these differences associated with review length, rating, and review period?
 - **RQ4 (Methodological Rigor & Reproducibility)**: What minimal data governance and statistical verification standards are necessary to prevent invalid significance claims in e-commerce review research?
 
 ### Formal Hypotheses
 - **$H_1$ (Star-Rating Divergence)**: At least 10% of 1-star/2-star and 4-star/5-star reviews exhibit mixed or conflicting text sentiment (e.g., positive product feedback paired with negative delivery/service complaints, or sarcastic phrasing), rendering star ratings an imperfect surrogate for textual sentiment.
 - **$H_2$ (VADER Neutral Class Weakness)**: VADER will exhibit significantly lower F1 scores on the *Neutral* class ($F_1 < 0.60$) compared to *Positive* and *Negative* classes, due to lexical dictionaries favoring strong polarity tokens and struggling with descriptive, non-emotive technical feedback.
-- **$H_3$ (Domain Composition)**: Any raw sentiment-distribution difference between the two sampled domains will change after stratifying by star rating and review length. Treat this as an exploratory within-source comparison; it cannot establish a causal marketplace effect or generalize to other categories.
+- **$H_3$ (Domain Composition)**: Any raw sentiment-distribution difference across the three domains will change after stratifying by star rating and review length. Electronics consists of the 1,000 products with the highest source metadata review counts, while All Beauty and Appliances use full category subsets; comparisons are exploratory and cannot establish a causal marketplace effect or generalize to other products or marketplaces.
 
 ---
 

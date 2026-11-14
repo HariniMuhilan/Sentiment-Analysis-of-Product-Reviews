@@ -2,7 +2,7 @@
 
 ## Amazon Reviews 2023 (UCSD McAuley Lab)
 
-The local database contains **2,797,473 unique Amazon Reviews 2023 reviews** from the **All_Beauty** and **Appliances** categories, plus **2,370** smart-device reviews from the cross-retailer Virtual Assistant Devices benchmark. Its current total is 2,799,843 reviews. The Amazon source files contained 2,830,133 rows; deterministic duplicate checks skipped 33,660 repeats. Dataset and database counts and SHA-256 hashes are recorded in `research/data_manifest.json`.
+The local research database now contains **8,349,286 Amazon reviews**: 2,797,473 from the full **All_Beauty** and **Appliances** subsets, plus **5,551,813 reviews** for the **1,000 Electronics products with the highest source metadata review counts**. It also includes **2,370** reviews from the five-retailer Virtual Assistant Devices benchmark, for **8,351,656 total records**. Electronics files are stored in `%LOCALAPPDATA%\SentimentAnalysisReview\raw`, outside the OneDrive checkout, and are not committed. Selection uses 2023 source metadata counts; it is not a current popularity ranking or a representative sample of all Electronics products. Exact counts and hashes are in `research/data_manifest.json`.
 
 - Dataset page and downloads: <https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023>
 - Dataset paper: Hou et al., *Bridging Language and Items for Retrieval and Recommendation* (2024), <https://arxiv.org/abs/2403.03952>
@@ -10,11 +10,11 @@ The local database contains **2,797,473 unique Amazon Reviews 2023 reviews** fro
 - Curator's licensing statement: no license is assigned by the curators; the files are provided primarily for research. Use only for research after reviewing the source terms and applicable law. Do not publish or redistribute the raw corpus or a database containing its review text without permission.
 - The Amazon records represent Amazon only. Cross-retailer reviews come from the separate Virtual Assistant Devices dataset documented below. Neither source provides current stock or current prices. Item metadata prices are often missing and are historical; they must not be presented as current prices.
 
-The Amazon review text and item metadata are stored under `Datasets/research/raw/`. `.gitignore` excludes these files and the local SQLite database. Keep the Amazon files and database local; do not commit or push them to GitHub.
+The original Amazon review text and item metadata are stored under `Datasets/research/raw/`; the new Electronics files are under `%LOCALAPPDATA%\SentimentAnalysisReview\raw`. `.gitignore` excludes files kept in the checkout, and the local SQLite database is excluded as well. Keep Amazon files and the populated database local; do not commit or push them to GitHub.
 
 ## Download the research files
 
-From the repository root in PowerShell:
+From the repository root in PowerShell. The Electronics files go outside the OneDrive checkout:
 
 ```powershell
 New-Item -ItemType Directory -Force Datasets/research/raw | Out-Null
@@ -26,18 +26,25 @@ curl.exe -L --fail --retry 3 -o Datasets/research/raw/Appliances.jsonl `
   "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/review_categories/Appliances.jsonl?download=true"
 curl.exe -L --fail --retry 3 -o Datasets/research/raw/meta_Appliances.jsonl `
   "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/meta_categories/meta_Appliances.jsonl?download=true"
+$dataDir = Join-Path $env:LOCALAPPDATA 'SentimentAnalysisReview\raw'
+New-Item -ItemType Directory -Force $dataDir | Out-Null
+curl.exe -L --fail --retry 3 --retry-delay 2 --continue-at - -o (Join-Path $dataDir 'Electronics.jsonl') `
+  "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/review_categories/Electronics.jsonl?download=true"
+curl.exe -L --fail --retry 3 --retry-delay 2 --continue-at - -o (Join-Path $dataDir 'meta_Electronics.jsonl') `
+  "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/meta_categories/meta_Electronics.jsonl?download=true"
 ```
 
 ## Import into the local application
 
-The project uses `backend/sentiment_research.db` by default. From the repository root:
+The default database path is `backend/sentiment_research.db`. On this PC, `backend/.env` points the application to `%LOCALAPPDATA%\SentimentAnalysisReview\sentiment_research.db` so the growing research database stays outside OneDrive. From the repository root:
 
 ```powershell
 cd backend
-..\.venv\Scripts\python.exe ingest_ucsd_amazon_2023.py
+..\.venv\Scripts\python.exe ingest_ucsd_amazon_2023.py --categories All_Beauty Appliances
+..\.venv\Scripts\python.exe ingest_ucsd_amazon_2023.py --data-dir "$env:LOCALAPPDATA\SentimentAnalysisReview\raw" --categories Electronics --top-products 1000
 ```
 
-The importer reads JSONL incrementally, matches reviews to item titles from the metadata, computes the project's documented VADER scores, and commits in batches. It is safe to rerun: deterministic review IDs are used to skip records already imported. For a quick smoke run, use `--max-records 1000`; use `--categories Appliances` or `--categories All_Beauty` to import one domain.
+The importer reads JSONL incrementally, matches reviews to item titles from the metadata, computes the project's documented VADER scores, and commits in batches. It is safe to rerun: deterministic review IDs are used to skip records already imported. `--top-products 1000` ranks items by the source metadata `rating_number` field and imports every matching text-bearing review for the selected products; it does not claim current popularity. The source Electronics files are about 22.6 GB of reviews plus 5.2 GB of metadata. The importer scans the full review file to find selected products, but analyzes sentiment only for matching reviews. Add `--max-records 1000` for a quick smoke run; that limited run is not the final catalog.
 
 The original 43-row synthetic fixture remains available at `Datasets/sample_authorized_reviews.csv` for tests and UI demos only. It is not part of the research database. Do not use it as empirical evidence.
 

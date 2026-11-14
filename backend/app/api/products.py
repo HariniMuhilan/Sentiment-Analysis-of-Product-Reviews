@@ -4,10 +4,22 @@ from sqlalchemy import func
 from typing import List, Optional
 from app.database import get_db
 from app.schemas import PlatformResponse, ProductSearchResult
-from app.models import Platform, Review
+from app.models import Platform, Product, Review
 from app.crud import get_product_search
 
 router = APIRouter(tags=["Catalog & Platforms"])
+
+@router.get("/categories", response_model=List[str])
+def list_categories(db: Session = Depends(get_db)):
+    """Lists product categories present in the local catalog."""
+    rows = (
+        db.query(Product.category)
+        .filter(Product.category.isnot(None))
+        .distinct()
+        .order_by(Product.category.asc())
+        .all()
+    )
+    return [category for (category,) in rows if category]
 
 @router.get("/platforms", response_model=List[PlatformResponse])
 def list_platforms(db: Session = Depends(get_db)):
@@ -41,8 +53,9 @@ def list_platforms(db: Session = Depends(get_db)):
 @router.get("/products", response_model=List[ProductSearchResult])
 def search_products(
     q: Optional[str] = Query(None, description="Partial product name search query"),
+    category: Optional[str] = Query(None, description="Optional exact product category filter"),
     limit: int = Query(20, ge=1, le=100, description="Max search results"),
     db: Session = Depends(get_db)
 ):
     """Case-insensitive partial product name search on local catalog."""
-    return get_product_search(db, query=q, limit=limit)
+    return get_product_search(db, query=q, limit=limit, category=category)

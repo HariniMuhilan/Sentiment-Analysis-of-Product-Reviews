@@ -12,6 +12,7 @@ import {
   fetchHealth, 
   fetchReadiness, 
   fetchPlatforms, 
+  fetchCategories,
   fetchSentimentAnalysis, 
   fetchReviews 
 } from './api/client';
@@ -21,6 +22,7 @@ function App() {
   const [health, setHealth] = useState(null);
   const [readiness, setReadiness] = useState(null);
   const [platforms, setPlatforms] = useState([]);
+  const [categories, setCategories] = useState([]);
   
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({
@@ -43,15 +45,17 @@ function App() {
   // Initialize status & platforms
   const initSystem = useCallback(async () => {
     try {
-      const [hRes, rRes, pRes] = await Promise.allSettled([
+      const [hRes, rRes, pRes, cRes] = await Promise.allSettled([
         fetchHealth(),
         fetchReadiness(),
-        fetchPlatforms()
+        fetchPlatforms(),
+        fetchCategories()
       ]);
 
       if (hRes.status === 'fulfilled') setHealth(hRes.value);
       if (rRes.status === 'fulfilled') setReadiness(rRes.value);
       if (pRes.status === 'fulfilled') setPlatforms(pRes.value);
+      if (cRes.status === 'fulfilled') setCategories(cRes.value);
     } catch (err) {
       console.warn('System initialization warning:', err);
     }
@@ -160,6 +164,7 @@ function App() {
         <SearchBar 
           onSearch={handleSearch} 
           initialQuery={query} 
+          category={filters.category}
         />
 
         {/* Filters */}
@@ -168,6 +173,7 @@ function App() {
           onChange={handleFilterChange} 
           onReset={handleResetFilters}
           platforms={platforms}
+          categories={categories}
         />
 
         {/* Main Content Area */}

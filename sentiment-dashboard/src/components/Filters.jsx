@@ -1,7 +1,7 @@
 import React from 'react';
 import { Filter, RotateCcw } from 'lucide-react';
 
-export default function Filters({ filters, onChange, onReset, platforms = [] }) {
+export default function Filters({ filters, onChange, onReset, platforms = [], categories = [] }) {
   const handlePlatformClick = (platformCode) => {
     onChange({
       ...filters,
@@ -24,7 +24,11 @@ export default function Filters({ filters, onChange, onReset, platforms = [] }) 
     });
   };
 
-  const isFiltered = filters.platform !== 'all' || filters.sentiment !== 'ALL' || filters.minRating !== null;
+  const handleCategoryChange = (e) => {
+    onChange({ ...filters, category: e.target.value || 'all' });
+  };
+
+  const isFiltered = filters.platform !== 'all' || filters.sentiment !== 'ALL' || filters.minRating !== null || filters.category !== 'all';
 
   return (
     <div className="filters-container glass-panel animate-fade-in" aria-label="Review Filters">
@@ -124,6 +128,21 @@ export default function Filters({ filters, onChange, onReset, platforms = [] }) 
             <option value="3.0">3.0+ Stars</option>
             <option value="2.0">2.0+ Stars</option>
             <option value="1.0">1.0+ Stars</option>
+          </select>
+        </div>
+
+        <div className="filter-group" style={{ minWidth: '170px' }}>
+          <label className="filter-label" htmlFor="category-select">Product Category</label>
+          <select
+            id="category-select"
+            className="filter-select"
+            value={filters.category || 'all'}
+            onChange={handleCategoryChange}
+          >
+            <option value="all">All Categories</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>{category}</option>
+            ))}
           </select>
         </div>
       </div>

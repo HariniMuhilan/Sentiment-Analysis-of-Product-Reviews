@@ -1,4 +1,5 @@
 import math
+import re
 from typing import Optional, List, Dict, Any, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_, distinct, case
@@ -97,20 +98,27 @@ def build_review_filter(
 ):
     clauses = []
     if query and query.strip():
-        term = f"%{query.strip()}%"
-        category_term = f"%{query.strip().replace(' ', '_')}%"
-        matching_products = db.query(Product.id).filter(or_(
-            Product.name.ilike(term),
-            Product.category.ilike(term),
-            Product.category.ilike(category_term),
-        ))
-        clauses.append(or_(
-            Review.product_id.in_(matching_products),
-            and_(
-                Review.product_id.is_(None),
-                or_(Review.product_name.ilike(term), Review.category.ilike(term), Review.category.ilike(category_term)),
-            ),
-        ))
+        normalized_query = " ".join(query.strip().split())
+        exact_product = db.query(Product.id).filter(func.lower(Product.name) == normalized_query.casefold())
+        if exact_product.first():
+            clauses.append(Review.product_id.in_(exact_product))
+            tokens = []
+        else:
+            tokens = list(dict.fromkeys(re.findall(r"[\w]+", normalized_query, flags=re.UNICODE)))
+        if tokens:
+            product_terms = [
+                or_(Product.name.ilike(f"%{token}%"), Product.category.ilike(f"%{token}%"))
+                for token in tokens
+            ]
+            review_terms = [
+                or_(Review.product_name.ilike(f"%{token}%"), Review.category.ilike(f"%{token}%"))
+                for token in tokens
+            ]
+            matching_products = db.query(Product.id).filter(and_(*product_terms))
+            clauses.append(or_(
+                Review.product_id.in_(matching_products),
+                and_(Review.product_id.is_(None), *review_terms),
+            ))
     if platform_code and platform_code.lower() != "all":
         p = db.query(Platform).filter(Platform.code == platform_code.lower()).first()
         if p:
@@ -118,7 +126,10 @@ def build_review_filter(
         else:
             clauses.append(Review.platform_id == -1) # No match
     if category and category.lower() != "all":
-        clauses.append(Review.category.ilike(f"%{category.strip()}%"))
+        # Categories come from the catalog filter and use canonical stored
+        # names. Exact matching lets SQLite use the indexed category column;
+        # a leading-wildcard ILIKE scans the entire multi-million-row table.
+        clauses.append(Review.category == category.strip())
     if min_rating is not None:
         clauses.append(Review.rating >= min_rating)
     if max_rating is not None:
@@ -132,7 +143,12 @@ def build_review_filter(
 
     return and_(*clauses) if clauses else True
 
-def get_product_search(db: Session, query: Optional[str] = None, limit: int = 20) -> List[Dict[str, Any]]:
+def get_product_search(
+    db: Session,
+    query: Optional[str] = None,
+    limit: int = 20,
+    category: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     review_count = func.count(Review.id)
     stmt = db.query(
         Product.id,
@@ -141,12 +157,28 @@ def get_product_search(db: Session, query: Optional[str] = None, limit: int = 20
         review_count.label("total_reviews"),
         func.avg(Review.rating).label("avg_rating")
     ).outerjoin(Review, Review.product_id == Product.id)
+    if category and category.lower() != "all":
+        stmt = stmt.filter(Product.category == category.strip())
+    phrase_match = None
     if query and query.strip():
-        term = f"%{query.strip()}%"
-        category_term = f"%{query.strip().replace(' ', '_')}%"
-        stmt = stmt.filter(or_(Product.name.ilike(term), Product.category.ilike(term), Product.category.ilike(category_term)))
+        normalized = " ".join(query.strip().split())
+        tokens = list(dict.fromkeys(re.findall(r"[\w]+", normalized, flags=re.UNICODE)))
+        if tokens:
+            # Match multiword product searches as terms, even when a title puts
+            # the words in a different order or separates them with punctuation.
+            # Requiring every token avoids flooding results with unrelated items
+            # that happen to contain only one word from the query.
+            for token in tokens:
+                token_pattern = f"%{token}%"
+                stmt = stmt.filter(or_(Product.name.ilike(token_pattern), Product.category.ilike(token_pattern)))
+            phrase_match = Product.name.ilike(f"%{normalized}%")
     
-    stmt = stmt.group_by(Product.id, Product.name, Product.category).order_by(review_count.desc()).limit(limit)
+    stmt = stmt.group_by(Product.id, Product.name, Product.category)
+    if phrase_match is not None:
+        stmt = stmt.order_by(phrase_match.desc(), review_count.desc(), Product.name.asc())
+    else:
+        stmt = stmt.order_by(review_count.desc(), Product.name.asc())
+    stmt = stmt.limit(limit)
     rows = stmt.all()
 
     product_ids = [row.id for row in rows]
@@ -160,14 +192,16 @@ def get_product_search(db: Session, query: Optional[str] = None, limit: int = 20
 
     return [
         {
-            "id": idx + 1,
+            # Return the real database key so product detail requests continue
+            # to refer to the same product after filtering and pagination.
+            "id": row.id,
             "name": row.name,
             "category": row.category or "General",
             "total_reviews": row.total_reviews,
             "average_rating": round(float(row.avg_rating), 2) if row.avg_rating else None,
             "platforms": sorted(platforms_by_product[row.id]),
         }
-        for idx, row in enumerate(rows)
+        for row in rows
     ]
 
 def get_aggregated_analysis(
@@ -185,81 +219,80 @@ def get_aggregated_analysis(
         db, query, platform_code, category, min_rating, max_rating, sentiment, start_date, end_date
     )
 
-    # 1. Total count & overall averages
-    overall_stats = db.query(
+    # Aggregate once and split by platform in the same database pass. This
+    # avoids rescanning millions of reviews separately for every registered
+    # platform when the local research corpus grows.
+    platform_stats = db.query(
+        Review.platform_id.label("platform_id"),
         func.count(Review.id).label("total"),
+        func.count(Review.rating).label("rated_total"),
+        func.sum(Review.rating).label("rating_sum"),
+        func.sum(Review.compound_score).label("compound_sum"),
         func.avg(Review.rating).label("avg_rating"),
         func.avg(Review.compound_score).label("avg_compound"),
         func.sum(case((Review.sentiment == 'POSITIVE', 1), else_=0)).label("pos_count"),
         func.sum(case((Review.sentiment == 'NEUTRAL', 1), else_=0)).label("neu_count"),
         func.sum(case((Review.sentiment == 'NEGATIVE', 1), else_=0)).label("neg_count")
-    ).filter(filter_clause).first()
+    ).filter(filter_clause).group_by(Review.platform_id).all()
 
-    total_reviews = overall_stats.total or 0
-    avg_rating = round(float(overall_stats.avg_rating), 2) if overall_stats.avg_rating else None
-    avg_compound = round(float(overall_stats.avg_compound), 4) if overall_stats.avg_compound else None
-    pos_count = int(overall_stats.pos_count or 0)
-    neu_count = int(overall_stats.neu_count or 0)
-    neg_count = int(overall_stats.neg_count or 0)
-
-    pos_pct = round((pos_count / total_reviews) * 100, 1) if total_reviews > 0 else 0.0
-    neu_pct = round((neu_count / total_reviews) * 100, 1) if total_reviews > 0 else 0.0
-    neg_pct = round((neg_count / total_reviews) * 100, 1) if total_reviews > 0 else 0.0
-
-    # 2. Per-platform statistics
+    stats_by_platform = {row.platform_id: row for row in platform_stats}
     all_platforms = db.query(Platform).all()
     platform_stats_list = []
     platforms_with_data = []
     platforms_without_data = []
 
+    total_reviews = sum(int(row.total or 0) for row in platform_stats)
+    rated_total = sum(int(row.rated_total or 0) for row in platform_stats)
+    rating_sum = sum(float(row.rating_sum or 0) for row in platform_stats)
+    compound_sum = sum(float(row.compound_sum or 0) for row in platform_stats)
+    pos_count = sum(int(row.pos_count or 0) for row in platform_stats)
+    neu_count = sum(int(row.neu_count or 0) for row in platform_stats)
+    neg_count = sum(int(row.neg_count or 0) for row in platform_stats)
+
+    avg_rating = round(rating_sum / rated_total, 2) if rated_total else None
+    avg_compound = round(compound_sum / total_reviews, 4) if total_reviews else None
+    pos_pct = round((pos_count / total_reviews) * 100, 1) if total_reviews > 0 else 0.0
+    neu_pct = round((neu_count / total_reviews) * 100, 1) if total_reviews > 0 else 0.0
+    neg_pct = round((neg_count / total_reviews) * 100, 1) if total_reviews > 0 else 0.0
+
     for plat in all_platforms:
-        # Check platform data within the filtered query
-        plat_filter = and_(filter_clause, Review.platform_id == plat.id)
-        p_stat = db.query(
-            func.count(Review.id).label("total"),
-            func.avg(Review.rating).label("avg_rating"),
-            func.avg(Review.compound_score).label("avg_compound"),
-            func.sum(case((Review.sentiment == 'POSITIVE', 1), else_=0)).label("pos_count"),
-            func.sum(case((Review.sentiment == 'NEUTRAL', 1), else_=0)).label("neu_count"),
-            func.sum(case((Review.sentiment == 'NEGATIVE', 1), else_=0)).label("neg_count")
-        ).filter(plat_filter).first()
-
-        p_total = p_stat.total or 0
-        if p_total > 0:
-            platforms_with_data.append(plat.name)
-            p_pos = int(p_stat.pos_count or 0)
-            p_neu = int(p_stat.neu_count or 0)
-            p_neg = int(p_stat.neg_count or 0)
-            p_pos_pct = round((p_pos / p_total) * 100, 1)
-            p_neu_pct = round((p_neu / p_total) * 100, 1)
-            p_neg_pct = round((p_neg / p_total) * 100, 1)
-            
-            wilson_low, wilson_high = calculate_wilson_interval(p_pos, p_total)
-            
-            if p_total < 30:
-                notes = f"Small sample size (N={p_total} < 30). High statistical uncertainty."
-            else:
-                notes = f"Adequate sample (N={p_total}). 95% Wilson positive sentiment CI: [{round(wilson_low*100, 1)}%, {round(wilson_high*100, 1)}%]."
-
-            platform_stats_list.append({
-                "platform_code": plat.code,
-                "platform_name": plat.name,
-                "review_count": p_total,
-                "average_rating": round(float(p_stat.avg_rating), 2) if p_stat.avg_rating else None,
-                "average_compound": round(float(p_stat.avg_compound), 4) if p_stat.avg_compound else None,
-                "sentiment_breakdown": {
-                    "positive": p_pos,
-                    "neutral": p_neu,
-                    "negative": p_neg,
-                    "positive_pct": p_pos_pct,
-                    "neutral_pct": p_neu_pct,
-                    "negative_pct": p_neg_pct
-                },
-                "wilson_positive_interval": (wilson_low, wilson_high),
-                "statistical_notes": notes
-            })
-        else:
+        p_stat = stats_by_platform.get(plat.id)
+        p_total = int(p_stat.total or 0) if p_stat else 0
+        if p_total <= 0:
             platforms_without_data.append(plat.name)
+            continue
+
+        platforms_with_data.append(plat.name)
+        p_pos = int(p_stat.pos_count or 0)
+        p_neu = int(p_stat.neu_count or 0)
+        p_neg = int(p_stat.neg_count or 0)
+        p_pos_pct = round((p_pos / p_total) * 100, 1)
+        p_neu_pct = round((p_neu / p_total) * 100, 1)
+        p_neg_pct = round((p_neg / p_total) * 100, 1)
+        wilson_low, wilson_high = calculate_wilson_interval(p_pos, p_total)
+
+        if p_total < 30:
+            notes = f"Small sample size (N={p_total} < 30). High statistical uncertainty."
+        else:
+            notes = f"Adequate sample (N={p_total}). 95% Wilson positive sentiment CI: [{round(wilson_low*100, 1)}%, {round(wilson_high*100, 1)}%]."
+
+        platform_stats_list.append({
+            "platform_code": plat.code,
+            "platform_name": plat.name,
+            "review_count": p_total,
+            "average_rating": round(float(p_stat.avg_rating), 2) if p_stat.avg_rating else None,
+            "average_compound": round(float(p_stat.avg_compound), 4) if p_stat.avg_compound else None,
+            "sentiment_breakdown": {
+                "positive": p_pos,
+                "neutral": p_neu,
+                "negative": p_neg,
+                "positive_pct": p_pos_pct,
+                "neutral_pct": p_neu_pct,
+                "negative_pct": p_neg_pct
+            },
+            "wilson_positive_interval": (wilson_low, wilson_high),
+            "statistical_notes": notes
+        })
 
     # 3. Statistical Leader Evaluation (Methodologically Defensible Two-Sample Tests)
     sorted_platforms = sorted(

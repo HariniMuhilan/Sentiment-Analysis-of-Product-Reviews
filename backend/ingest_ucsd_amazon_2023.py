@@ -7,6 +7,7 @@ database containing its review text. See Datasets/research/README.md.
 
 import argparse
 import hashlib
+import heapq
 import json
 import sys
 from datetime import datetime, timezone
@@ -26,11 +27,19 @@ PLATFORM_CODE = "amazon_ucsd_2023"
 CATEGORY_FILES = {
     "All_Beauty": ("All_Beauty.jsonl", "meta_All_Beauty.jsonl"),
     "Appliances": ("Appliances.jsonl", "meta_Appliances.jsonl"),
+    # Electronics covers the mainstream device categories missing from the
+    # original two-category local corpus (audio, headphones, speakers, etc.).
+    "Electronics": ("Electronics.jsonl", "meta_Electronics.jsonl"),
 }
 
 
-def load_products(metadata_path: Path, category: str) -> dict[str, tuple[str, str]]:
+def load_products(
+    metadata_path: Path,
+    category: str,
+    top_products: int | None = None,
+) -> dict[str, tuple[str, str]]:
     products: dict[str, tuple[str, str]] = {}
+    popular: list[tuple[int, str]] = []
     with metadata_path.open("r", encoding="utf-8") as stream:
         for line in stream:
             try:
@@ -41,6 +50,24 @@ def load_products(metadata_path: Path, category: str) -> dict[str, tuple[str, st
             title = " ".join(str(row.get("title") or "").split())
             if asin and title:
                 products[asin] = (title[:255], category)
+                if top_products is not None:
+                    try:
+                        review_count = max(0, int(row.get("rating_number") or 0))
+                    except (TypeError, ValueError):
+                        review_count = 0
+                    if review_count:
+                        item = (review_count, asin)
+                        if len(popular) < top_products:
+                            heapq.heappush(popular, item)
+                        elif item > popular[0]:
+                            heapq.heapreplace(popular, item)
+    if top_products is not None:
+        selected_asins = {asin for _, asin in popular}
+        products = {asin: product for asin, product in products.items() if asin in selected_asins}
+        print(
+            f"Selected {len(products):,} {category} products by source metadata rating_number (top {top_products:,}).",
+            flush=True,
+        )
     return products
 
 
@@ -52,14 +79,21 @@ def review_external_id(row: dict) -> str:
     return hashlib.sha256(stable_fields.encode("utf-8")).hexdigest()
 
 
-def import_category(db, category: str, data_dir: Path, batch_size: int, max_records: int | None) -> int:
+def import_category(
+    db,
+    category: str,
+    data_dir: Path,
+    batch_size: int,
+    max_records: int | None,
+    top_products: int | None = None,
+) -> int:
     review_path, metadata_path = (data_dir / name for name in CATEGORY_FILES[category])
     if not review_path.is_file() or not metadata_path.is_file():
         raise FileNotFoundError(f"Missing files for {category}; see Datasets/research/README.md")
 
     print(f"Loading {category} product metadata...", flush=True)
     display_category = category.replace("_", " ")
-    products = load_products(metadata_path, display_category)
+    products = load_products(metadata_path, display_category, top_products=top_products)
     existing_products = {
         (name.casefold(), product_category)
         for name, product_category in db.query(Product.name, Product.category).all()
@@ -112,7 +146,10 @@ def import_category(db, category: str, data_dir: Path, batch_size: int, max_reco
         model_name=MODEL_NAME,
         model_version=MODEL_VERSION,
         status="in_progress",
-        notes=f"{DATASET_ID} {DATASET_VERSION}; category={category}; source rows read from {review_path.name}",
+        notes=(
+            f"{DATASET_ID} {DATASET_VERSION}; category={category}; source rows read from {review_path.name}"
+            + (f"; top_products_by_rating_number={top_products}" if top_products is not None else "")
+        ),
         started_at=datetime.now(timezone.utc),
     )
     db.add(run)
@@ -131,6 +168,9 @@ def import_category(db, category: str, data_dir: Path, batch_size: int, max_reco
             except json.JSONDecodeError:
                 continue
             parsed += 1
+            asin = row.get("parent_asin") or row.get("asin")
+            if asin not in products:
+                continue
             review_text = " ".join(str(row.get("text") or "").split())
             if not review_text:
                 continue
@@ -138,7 +178,6 @@ def import_category(db, category: str, data_dir: Path, batch_size: int, max_reco
             if ext_id in existing_ids:
                 continue
 
-            asin = row.get("parent_asin") or row.get("asin")
             product_name, product_category = products.get(
                 asin, (f"Amazon item {asin or 'unknown'}", category)
             )
@@ -209,10 +248,17 @@ def main() -> None:
     parser.add_argument("--categories", nargs="+", choices=sorted(CATEGORY_FILES), default=sorted(CATEGORY_FILES))
     parser.add_argument("--batch-size", type=int, default=2000)
     parser.add_argument("--max-records", type=int, help="Optional per-category limit for a quick local smoke run")
+    parser.add_argument(
+        "--top-products",
+        type=int,
+        help="Import all reviews only for the most-reviewed products by source metadata rating_number",
+    )
     args = parser.parse_args()
 
     if args.batch_size < 100 or args.batch_size > 10000:
         parser.error("--batch-size must be between 100 and 10000")
+    if args.top_products is not None and args.top_products < 1:
+        parser.error("--top-products must be at least 1")
 
     Base.metadata.create_all(bind=engine)
     if engine.dialect.name == "sqlite":
@@ -222,7 +268,10 @@ def main() -> None:
 
     db = SessionLocal()
     try:
-        total = sum(import_category(db, category, args.data_dir, args.batch_size, args.max_records) for category in args.categories)
+        total = sum(
+            import_category(db, category, args.data_dir, args.batch_size, args.max_records, args.top_products)
+            for category in args.categories
+        )
         print(f"Done. Imported {total:,} reviews in total.")
     finally:
         db.close()

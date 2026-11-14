@@ -83,3 +83,9 @@ The project now has a local import path for the All Beauty and Appliances subset
 - Star ratings are not human-annotated sentiment labels. VADER agreement with ratings is descriptive agreement, not classifier accuracy.
 - The protocol and manuscript have been re-scoped to these two domains and remain drafts. They are not formally pre-registered and contain no completed human annotation study.
 - Before paper submission, report exact imported counts and hashes from `research/data_manifest.json`, inspect duplicates/missing metadata, predefine sampling, annotate a blinded sample with at least two people, report inter-annotator agreement, and validate sentiment models against adjudicated labels.
+
+## 5. Status After Popular-Product Catalog Expansion (2026-11-14)
+
+The local searchable database now contains 8,351,656 review records: 8,349,286 Amazon reviews across All Beauty, Appliances, and the 1,000 highest-source-review-count Electronics products, plus 2,370 reviews from the small Virtual Assistant Devices benchmark. The app now supports multiword searches, exact product selection, category filtering, and one-pass per-platform aggregation for large databases. The Electronics source files and populated database remain local because the dataset curators assign no license and describe the release as primarily for research.
+
+This improves Amazon product breadth but does not provide broad cross-platform coverage for arbitrary products. Electronics is popularity-selected from 2023 metadata and is not representative of its full category or current popularity. The Virtual Assistant Devices benchmark remains small and cannot substantiate broad marketplace comparisons. Human-annotated model validation, duplicate/missing-metadata audits, formal pre-registration, and any publication rights review remain outstanding.

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Loader2 } from 'lucide-react';
 import { searchCatalog } from '../api/client';
 
-export default function SearchBar({ onSearch, initialQuery = '' }) {
+export default function SearchBar({ onSearch, initialQuery = '', category = 'all' }) {
   const [searchTerm, setSearchTerm] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState([]);
   const [isSearchingSuggestions, setIsSearchingSuggestions] = useState(false);
@@ -19,7 +19,7 @@ export default function SearchBar({ onSearch, initialQuery = '' }) {
     const timer = setTimeout(async () => {
       setIsSearchingSuggestions(true);
       try {
-        const results = await searchCatalog(searchTerm);
+        const results = await searchCatalog(searchTerm, category);
         setSuggestions(results);
         setShowDropdown(true);
       } catch (err) {
@@ -30,7 +30,7 @@ export default function SearchBar({ onSearch, initialQuery = '' }) {
     }, 250);
 
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, category]);
 
   // Click outside to close dropdown
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function SearchBar({ onSearch, initialQuery = '' }) {
           <input
             type="text"
             className="search-input"
-            placeholder="Search a category or product (e.g. 'All Beauty', 'Appliances', 'ice maker')"
+            placeholder="Search products or categories (e.g. 'wireless headphones', 'coffee maker')"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => { if (suggestions.length > 0) setShowDropdown(true); }}

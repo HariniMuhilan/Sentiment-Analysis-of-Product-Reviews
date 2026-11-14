@@ -6,6 +6,7 @@ from app.nlp.evaluate import run_evaluation_on_dataset
 from app.models import BenchmarkReview
 
 router = APIRouter(tags=["Model Evaluation"])
+REPRO_BENCHMARK_SOURCE = "RePro-2024-single-polarity"
 
 # Internal sanity-check unit test fixtures for pipeline verification.
 # IMPORTANT: These fixtures are NOT independent validation data and must NEVER be
@@ -42,7 +43,7 @@ UNIT_TEST_FIXTURES = [
 def get_evaluation_metrics(db: Session = Depends(get_db)):
     """
     Returns evaluation metrics. Explicitly flags whether the evaluation is derived
-    from a verified empirical human-annotated benchmark or internal unit-test fixtures.
+    from the documented RePro benchmark or internal/unverified records.
     """
     db_benchmarks = db.query(BenchmarkReview).all()
     if db_benchmarks and len(db_benchmarks) >= 10:
@@ -55,9 +56,9 @@ def get_evaluation_metrics(db: Session = Depends(get_db)):
             }
             for b in db_benchmarks
         ]
-        is_empirical = True
-        source_ids = {b.source for b in db_benchmarks}
-        if source_ids == {"RePro-2024-single-polarity"}:
+        source_ids = {str(b.source or "unspecified") for b in db_benchmarks}
+        if source_ids == {REPRO_BENCHMARK_SOURCE}:
+            is_empirical = True
             dataset_source = (
                 f"RePro / Americanas.com human-annotated benchmark "
                 f"({len(db_benchmarks):,} single-polarity reviews)"
@@ -72,14 +73,16 @@ def get_evaluation_metrics(db: Session = Depends(get_db)):
                 "marketplace sentiment prevalence."
             )
         else:
+            is_empirical = False
             source_text = ", ".join(sorted(source_ids))
             dataset_source = (
-                f"Empirical Database Benchmark Corpus ({len(db_benchmarks):,} records; {source_text})"
+                f"Unverified Database Benchmark Records ({len(db_benchmarks):,}; {source_text})"
             )
             methodology = (
-                f"Evaluated against {len(db_benchmarks):,} human-annotated review records stored in database. "
-                "Metrics include precision, recall, macro F1, and a 3x3 confusion matrix. "
-                "See each source's annotation and language notes before interpreting pooled metrics."
+                f"Metrics were computed for {len(db_benchmarks):,} stored benchmark records, but their source "
+                "is not the project's documented RePro benchmark (or the records mix sources). These results "
+                "are not marked empirical and must not be cited as validated model performance until each "
+                "source's provenance, annotation method, labels, and language suitability are verified."
             )
     else:
         dataset = UNIT_TEST_FIXTURES

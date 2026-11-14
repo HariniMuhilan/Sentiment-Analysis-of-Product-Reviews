@@ -1,4 +1,6 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// The local API binds to IPv4 loopback (127.0.0.1). Using `localhost` can
+// resolve to IPv6 ::1 on Windows and leave the dashboard stuck offline.
+const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 async function handleResponse(res) {
   if (!res.ok) {
@@ -29,9 +31,15 @@ export async function fetchPlatforms() {
   return handleResponse(res);
 }
 
-export async function searchCatalog(query) {
+export async function fetchCategories() {
+  const res = await fetch(`${API_BASE}/categories`);
+  return handleResponse(res);
+}
+
+export async function searchCatalog(query, category) {
   const params = new URLSearchParams();
   if (query) params.append('q', query);
+  if (category && category !== 'all') params.append('category', category);
   params.append('limit', '10');
   const res = await fetch(`${API_BASE}/products?${params.toString()}`);
   return handleResponse(res);

@@ -2,14 +2,15 @@
 
 ## Active corpus
 
-The local research database contains two datasets. Its large corpus uses two category subsets from Amazon Reviews 2023, curated by the McAuley Lab at UC San Diego:
+The local research database contains two dataset sources. Its large corpus uses three Amazon Reviews 2023 subsets curated by the McAuley Lab at UC San Diego:
 
 | Corpus subset | Source page | Source rows | Imported unique reviews | Domain |
 |---|---|---:|---:|---|
 | All_Beauty | [Dataset files](https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023) | 701,528 | 693,547 | Beauty and personal care |
 | Appliances | [Dataset files](https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023) | 2,128,605 | 2,103,926 | Household appliances |
+| Electronics | [Dataset files](https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023) | 43,886,944 | 5,551,813 | All text-bearing reviews for the top 1,000 products by source metadata `rating_number` |
 
-The importer skipped 33,660 repeated rows, for 2,797,473 unique Amazon reviews. The searchable database also contains 2,370 English reviews from the Virtual Assistant Devices cross-retailer benchmark (Amazon, Best Buy, eBay, Target, and Walmart), for a current total of 2,799,843 review records. The dataset's hand labels remain in its separate source/processed files; the application stores only its VADER-generated analysis. Exact source-file hashes and platform counts are in `research/data_manifest.json`.
+The All_Beauty and Appliances figures describe the original imported snapshot, which skipped 33,660 repeated rows. The searchable database now contains 8,351,656 review records: 8,349,286 Amazon reviews across the three subsets, plus 2,370 English reviews from the Virtual Assistant Devices cross-retailer benchmark (Amazon, Best Buy, eBay, Target, and Walmart). The benchmark's hand labels remain in separate source/processed files; the application stores only its VADER-generated analysis. Electronics selection uses source metadata review counts from the 2023 release, not current popularity, and is not representative of the full category. Exact counts and file hashes are recorded in `research/data_manifest.json`.
 
 The dataset spans May 1996 to September 2023. It contains Amazon review text, ratings, product identifiers, timestamps, and separate item metadata. It is historical research data, not a live product catalog or price feed.
 

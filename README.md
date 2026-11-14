@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg?logo=python&logoColor=white)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An end-to-end product review sentiment analysis application and reproducible research framework. The main searchable product corpus contains historical Amazon reviews from the UCSD McAuley Lab Amazon Reviews 2023 dataset in the All Beauty and Appliances categories. Separate research files include RePro, Brazilian Olist and B2W corpora, a small five-retailer smart-device benchmark, and a Bengali multilingual review benchmark. These datasets have different languages, sampling frames, and identifiers; they are kept separate from the searchable Amazon database. See [`Datasets/README.md`](Datasets/README.md) for sources, reuse terms, and limitations.
+An end-to-end product review sentiment analysis application and reproducible research framework. The searchable product corpus contains historical Amazon reviews from the UCSD McAuley Lab Amazon Reviews 2023 dataset, including All Beauty, Appliances, and the 1,000 Electronics products with the highest source metadata review counts. The application supports multiword product search, exact product selection, and product-category filtering. Separate research files include RePro, Brazilian Olist and B2W corpora, a small five-retailer smart-device benchmark, and a Bengali multilingual review benchmark. These datasets have different languages, sampling frames, and identifiers; they are kept separate from the searchable Amazon database. See [`Datasets/README.md`](Datasets/README.md) for sources, reuse terms, and limitations.
 
 ---
 
@@ -111,7 +111,13 @@ python ingest_ucsd_amazon_2023.py --categories All_Beauty Appliances
 # Launch the FastAPI backend server
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
-The backend API is now running at `http://127.0.0.1:8000`. Interactive documentation is available at `http://127.0.0.1:8000/docs`. The research database is stored in `backend/sentiment_research.db` and is excluded from Git.
+For the 1,000 most-reviewed Electronics products on this Windows setup, use PowerShell after changing to `backend`:
+
+```powershell
+python ingest_ucsd_amazon_2023.py --data-dir "$env:LOCALAPPDATA\SentimentAnalysisReview\raw" --categories Electronics --top-products 1000
+```
+
+The backend API is now running at `http://127.0.0.1:8000`. Interactive documentation is available at `http://127.0.0.1:8000/docs`. Database location is set with `DATABASE_URL`; this PC stores the growing local research database under `%LOCALAPPDATA%\SentimentAnalysisReview` to keep it outside the OneDrive checkout. The database is excluded from Git.
 
 ### 2. Set Up Frontend Dashboard
 In a new terminal:

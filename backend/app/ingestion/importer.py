@@ -1,6 +1,7 @@
 import hashlib
 from typing import List, Dict, Any, Tuple
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.models import Platform, Product, Review, AnalysisRun
 from app.nlp.sentiment import analyze_review_text, MODEL_NAME, MODEL_VERSION
 from app.ingestion.parsers import parse_stream
@@ -84,16 +85,33 @@ def ensure_platforms_exist(db: Session) -> Dict[str, Platform]:
         platforms[p.code] = p
     return platforms
 
-def get_or_create_product(db: Session, product_name: str, category: str = "General") -> Product:
-    """Finds or creates a product by trimmed name."""
+def get_or_create_product(
+    db: Session,
+    product_name: str,
+    category: str = "General",
+    product_cache: Dict[Tuple[str, str], Tuple[int, str, str]] | None = None,
+) -> Tuple[int, str, str]:
+    """Finds or stages a product by normalized name and category."""
     clean_name = product_name.strip()
-    product = db.query(Product).filter(Product.name.ilike(clean_name)).first()
+    clean_category = (category or "General").strip() or "General"
+    cache_key = (clean_name.lower(), clean_category.lower())
+    if product_cache is not None and cache_key in product_cache:
+        return product_cache[cache_key]
+
+    product = db.query(Product).filter(
+        func.lower(Product.name) == clean_name.lower(),
+        func.lower(func.coalesce(Product.category, "General")) == clean_category.lower(),
+    ).first()
     if not product:
-        product = Product(name=clean_name, category=category.strip())
+        product = Product(name=clean_name, category=clean_category)
         db.add(product)
-        db.commit()
-        db.refresh(product)
-    return product
+        # Flush assigns the ID without committing a separate transaction for
+        # every distinct product encountered during a review import.
+        db.flush()
+    result = (product.id, product.name, product.category or "General")
+    if product_cache is not None:
+        product_cache[cache_key] = result
+    return result
 
 def compute_review_hash(platform_code: str, product_name: str, review_text: str) -> str:
     key = f"{platform_code.lower()}|{product_name.lower().strip()}|{review_text.strip()}"
@@ -136,22 +154,29 @@ def import_records_from_stream(
     db.commit()
     db.refresh(run)
 
-    # Pre-fetch existing external_ids for platform-scoped fast deduplication
-    existing_external_ids = set(
-        x[0] for x in db.query(Review.external_id).filter(Review.external_id.isnot(None)).all()
-    )
+    # Review IDs are only unique within a marketplace. Loading/checking them
+    # globally caused an identical ID from another platform to be discarded.
+    existing_external_ids_by_platform: Dict[int, set[str]] = {}
+    product_cache: Dict[Tuple[str, str], Tuple[int, str, str]] = {}
+
+    def existing_ids_for(platform_id: int) -> set[str]:
+        if platform_id not in existing_external_ids_by_platform:
+            existing_external_ids_by_platform[platform_id] = {
+                value[0]
+                for value in db.query(Review.external_id)
+                .filter(
+                    Review.platform_id == platform_id,
+                    Review.external_id.isnot(None),
+                )
+                .yield_per(10000)
+            }
+        return existing_external_ids_by_platform[platform_id]
 
     batch_reviews = []
+    platform_ids = {code: platform.id for code, platform in platforms.items()}
 
     for rec in records_generator:
         total_parsed += 1
-        
-        # Deduplication check
-        ext_id = rec.get("external_id")
-        if ext_id and ext_id in existing_external_ids:
-            total_skipped_duplicates += 1
-            rejections["duplicate_external_id"] += 1
-            continue
 
         plat_code = rec.get("platform_code", platform_code).lower()
         if plat_code not in platforms:
@@ -166,19 +191,36 @@ def import_records_from_stream(
             db.commit()
             db.refresh(new_plat)
             platforms[plat_code] = new_plat
+            platform_ids[plat_code] = new_plat.id
+        platform_id = platform_ids[plat_code]
 
-        platform = platforms[plat_code]
-        product = get_or_create_product(db, rec["product_name"], rec.get("category", "General"))
+        # Deduplication check
+        raw_ext_id = rec.get("external_id")
+        ext_id = str(raw_ext_id).strip() if raw_ext_id is not None else None
+        if ext_id == "":
+            ext_id = None
+        platform_external_ids = existing_ids_for(platform_id) if ext_id else None
+        if ext_id and platform_external_ids is not None and ext_id in platform_external_ids:
+            total_skipped_duplicates += 1
+            rejections["duplicate_external_id"] += 1
+            continue
+
+        product_id, product_name, product_category = get_or_create_product(
+            db,
+            rec["product_name"],
+            rec.get("category", "General"),
+            product_cache,
+        )
 
         # Real NLP Sentiment Analysis Execution
         sentiment_res = analyze_review_text(rec["review_text"], rating=rec.get("rating"))
 
         review = Review(
             external_id=ext_id,
-            platform_id=platform.id,
-            product_id=product.id,
-            product_name=product.name,
-            category=rec.get("category") or product.category,
+            platform_id=platform_id,
+            product_id=product_id,
+            product_name=product_name,
+            category=rec.get("category") or product_category,
             headline=rec.get("headline"),
             review_text=rec["review_text"],
             rating=rec.get("rating"), # Preserves None if unrated
@@ -196,16 +238,18 @@ def import_records_from_stream(
         )
 
         batch_reviews.append(review)
-        if ext_id:
-            existing_external_ids.add(ext_id)
+        if ext_id and platform_external_ids is not None:
+            platform_external_ids.add(ext_id)
 
         if len(batch_reviews) >= batch_size:
+            db.flush()
             db.bulk_save_objects(batch_reviews)
             db.commit()
             total_imported += len(batch_reviews)
             batch_reviews = []
 
     if batch_reviews:
+        db.flush()
         db.bulk_save_objects(batch_reviews)
         db.commit()
         total_imported += len(batch_reviews)

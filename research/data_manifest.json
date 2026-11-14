@@ -1,11 +1,11 @@
 {
   "project": "Sentiment Analysis Review",
   "manifest_version": "3.0.0",
-  "generated_at": "2026-10-30T17:00:00Z",
+  "generated_at": "2026-11-14T08:25:03Z",
   "local_research_database": {
-    "path": "backend/sentiment_research.db",
-    "review_count": 2799843,
-    "product_count": 206906,
+    "path": "%LOCALAPPDATA%/SentimentAnalysisReview/sentiment_research.db",
+    "review_count": 8351656,
+    "product_count": 207906,
     "source_platform": "amazon_ucsd_2023 + virtual_assistant_devices",
     "benchmark_review_count": 7985,
     "benchmark_dataset": "RePro-2024-single-polarity",
@@ -74,6 +74,40 @@
         "Not current retailer prices.",
         "Single marketplace; no cross-platform claims.",
         "Ratings are not human-annotated sentiment labels."
+      ]
+    },
+    {
+      "id": "AMAZON-REVIEWS-2023-ELECTRONICS-TOP-1000",
+      "name": "Amazon Reviews 2023 — Electronics (top 1,000 by source review count)",
+      "type": "research_corpus_popularity_selected_subset",
+      "provider": "McAuley Lab, UC San Diego",
+      "source_url": "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023",
+      "downloaded_at": "2026-11-14",
+      "local_files_ignored_by_git": true,
+      "source_rows_scanned": 43886944,
+      "selected_product_count": 1000,
+      "imported_unique_review_rows": 5551813,
+      "database_product_count": 1000,
+      "selection_method": "Rank Electronics metadata parent_asin entries by rating_number and select the top 1,000; import every matching non-empty review row and deduplicate by stable content hash.",
+      "source_files": {
+        "reviews_jsonl": {
+          "local_path": "%LOCALAPPDATA%/SentimentAnalysisReview/raw/Electronics.jsonl",
+          "bytes": 22616233652,
+          "sha256": "BF11CF9C94C23EAD7D3FFB174D18231FAD8FCD76E72AD167F538A5599A38DE8E"
+        },
+        "item_metadata_jsonl": {
+          "local_path": "%LOCALAPPDATA%/SentimentAnalysisReview/raw/meta_Electronics.jsonl",
+          "bytes": 5246144134,
+          "sha256": "5EB4DABD539586C49654297319EF178B62A2FE8E43108376FEDA125F04455D93"
+        }
+      },
+      "rights_status": "No license assigned by dataset curators; they say the corpus is made available primarily for research.",
+      "use_policy": "Local research use only. Do not redistribute raw review text or the populated database without separate permission.",
+      "limitations": [
+        "Historical Amazon reviews through September 2023; not live reviews, inventory, or prices.",
+        "The 1,000 items are selected by source metadata review counts and are not a probability sample of the Electronics category or a measure of current popularity.",
+        "Single marketplace for this corpus; it does not provide broad cross-platform review coverage or verified cross-retailer product identity.",
+        "Star ratings are not human-annotated sentiment labels."
       ]
     },
     {
@@ -335,7 +369,7 @@
     }
   ],
   "not_included": [
-    "No dataset with reviews of the same identified product model across multiple retailers is included. Public candidates and pending rights checks are documented in research/cross_platform_data_clearance.md.",
+    "No dataset with independently verified global product identifiers linking products across retailers is included. The Virtual Assistant Devices dataset groups some device reviews by its source-provided names across retailers; these groupings are not independently verified. Public candidates and pending rights checks are documented in research/cross_platform_data_clearance.md.",
     "The Olist supplementary corpus is separate from and not loaded into the main application database.",
     "RePro is an annotated subset of B2W-Reviews01, not an independent additional review corpus; its 3-class benchmark excludes mixed labels.",
     "No authorized Flipkart, Myntra, Meesho, Daraz, or Pickaboo review corpus is included.",

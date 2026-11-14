@@ -12,7 +12,7 @@ export default function DataProvenanceBanner() {
           <div>
             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Data Integrity, Licensing & Compliance Notice</span>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              The research database contains historical Amazon reviews; it is not live inventory or cross-platform data.
+              Historical Amazon reviews plus a small cross-retailer device corpus; no live listings, prices, or inventory.
             </div>
           </div>
         </div>
@@ -32,14 +32,20 @@ export default function DataProvenanceBanner() {
           <div className="provenance-grid">
             <div className="provenance-item">
               <h4>Amazon Reviews 2023 (UCSD McAuley Lab)</h4>
-              <p>Local research copy of the All Beauty and Appliances category review and item metadata files. Source reviews are historical (collection through September 2023).</p>
+              <p>The local research corpus includes All Beauty and Appliances, with Electronics expanding coverage to popular audio, phone, and home-device products. Electronics selection uses the 1,000 products with the highest source metadata review counts, then includes their matching reviews. This is historical Amazon data through September 2023, not a current popularity ranking.</p>
               <span className="provenance-meta">Research use: the curators assign no license and say the files are provided primarily for research. Do not redistribute review text.</span>
             </div>
 
             <div className="provenance-item">
-              <h4>Coverage and freshness</h4>
-              <p>This corpus represents one marketplace. It does not provide live offers, current stock, current prices, or reviews from Flipkart, Myntra, or Meesho.</p>
-              <span className="provenance-meta">Use available prices only if independently verified as current; this corpus's metadata prices may be missing or historical.</span>
+              <h4>Cross-retailer coverage and freshness</h4>
+              <p>The searchable data includes 2,370 smart-device reviews from Amazon, Best Buy, eBay, Target, and Walmart. Five of ten source-provided device names appear on multiple retailers. This is a small historical benchmark, not broad marketplace coverage, and the names are not verified against global product identifiers.</p>
+              <span className="provenance-meta">The research data does not provide live offers, current stock, or current prices. Do not interpret source-provided device-name groupings as independently verified product matches.</span>
+            </div>
+
+            <div className="provenance-item">
+              <h4>Virtual Assistant Devices label limitation</h4>
+              <p>The dataset's downloaded sentiment-label counts differ from the counts reported by its paper and record. The app runs VADER on the review text; it does not use those source labels as predictions.</p>
+              <span className="provenance-meta">Do not treat the disputed source labels as a gold evaluation set unless the discrepancy is resolved.</span>
             </div>
 
             <div className="provenance-item">

@@ -4,18 +4,18 @@
 **Authors**: Harini Muhilan et al.  
 **Affiliation**: Undergraduate Research Opportunities Programme (UROP), Computer Science & Data Intelligence  
 **Document Status**: Working manuscript draft; protocol not formally pre-registered (Venue-Neutral)
-**Last Updated**: October 2026  
+**Last Updated**: November 14, 2026
 
 ---
 
 ## Abstract
-This working study examines lexical sentiment analysis and rating-text agreement in historical Amazon product reviews. The local research corpus contains the All Beauty and Appliances subsets of Amazon Reviews 2023, with approximately 2.8 million reviews collected between 1996 and September 2023. The application computes VADER sentiment scores and supports reproducible filtering and aggregation. Star ratings are treated as observed user scores, not human-annotated sentiment ground truth; therefore rating-text agreement is not reported as classifier accuracy. Independent human annotation and model validation remain required before drawing claims about sentiment accuracy. The corpus represents one marketplace and two selected domains, so it cannot support cross-platform comparisons, current price claims, or generalization to all products. This manuscript is a working protocol and project description; empirical results and a formal pre-registration are not yet complete.
+This working study examines lexical sentiment analysis and rating-text agreement in historical Amazon product reviews. The local research database contains 8,351,656 review records: 8,349,286 Amazon reviews across the full All Beauty and Appliances subsets and a popularity-selected Electronics subset, plus 2,370 reviews from the small Virtual Assistant Devices cross-retailer benchmark. The Electronics subset includes matching reviews for the 1,000 products with the highest source metadata review counts; exact imported counts are recorded in `research/data_manifest.json`. The application computes VADER sentiment scores and supports reproducible filtering and aggregation. Star ratings are treated as observed user scores, not human-annotated sentiment ground truth; therefore rating-text agreement is not reported as classifier accuracy. Independent human annotation and model validation remain required before drawing claims about sentiment accuracy. The corpus represents one primary marketplace and selected domains; Electronics selection is not representative of its full category, and the data cannot support broad cross-platform comparisons or current price claims. This manuscript is a working protocol and project description; empirical results and a formal pre-registration are not yet complete.
 
 ---
 
 ## 1. Introduction and Research Question
 
-Online customer reviews provide large collections of naturally occurring product feedback. This project studies a bounded historical Amazon corpus and focuses on reproducible analysis of review text, user ratings, and two product domains. The current dataset does not include authorized review data from other marketplaces.
+Online customer reviews provide large collections of naturally occurring product feedback. This project studies a bounded historical Amazon corpus and focuses on reproducible analysis of review text, user ratings, and three product domains. The current dataset does not include broad, product-matched review data from other marketplaces.
 
 Despite the proliferation of academic papers analyzing e-commerce reviews, empirical reproducibility remains critically low. Many studies commit one or more foundational errors:
 1. **Pseudo-Ground-Truth Conflation**: Equating consumer numerical star ratings (1–5) directly with textual sentiment polarity, ignoring sarcasm, service-versus-product divergence, and rating inflation (Mudambi & Schuff, 2010).
@@ -26,7 +26,7 @@ Despite the proliferation of academic papers analyzing e-commerce reviews, empir
 To address these shortcomings, this study formulates a disciplined investigation guided by three core research questions:
 - **RQ1 (Model Accuracy vs. Ground Truth)**: How accurately does lexical sentiment classification (VADER) classify e-commerce review text into Positive, Neutral, and Negative polarities when measured against independent, double-annotated human ground truth rather than star ratings?
 - **RQ2 (Rating-Text Divergence)**: What proportion of consumer reviews exhibit divergence between star ratings and text sentiment (e.g., 5-star reviews describing defective goods, or 1-star reviews praising the product but condemning delivery), and what biases arise from using star ratings as pseudo-labels?
-- **RQ3 (Within-Source Domain Variation)**: How do rating-text agreement and VADER outputs differ between All Beauty and Appliances, and how are these differences associated with review length, rating, and review period?
+- **RQ3 (Within-Source Domain Variation)**: How do rating-text agreement and VADER outputs differ across All Beauty, Appliances, and a popularity-selected Electronics subset, and how are these differences associated with review length, rating, and review period?
 
 ---
 
@@ -46,7 +46,7 @@ Recent audits in natural language processing (Lilleberg et al., 2015; Rogers et 
 ## 3. Data Sources, Permissions, and Collection
 
 ### 3.1 Active Corpus and Eligibility
-The local corpus contains the **All_Beauty** and **Appliances** category subsets of Amazon Reviews 2023 curated by the McAuley Lab. The source reports approximately 701.5K and 2.1M reviews, respectively; exact locally imported counts and file hashes are recorded in `research/data_manifest.json`. Review timestamps span May 1996 through September 2023. The corpus is historical Amazon data and is not a live product or price feed.
+The local corpus contains the **All_Beauty** and **Appliances** category subsets plus the 1,000 Electronics products with the highest source metadata `rating_number` in Amazon Reviews 2023, curated by the McAuley Lab. All available review rows matching those selected Electronics product identifiers are included. This deterministic popularity selection is defined for catalog coverage; it is not a probability sample and cannot represent the Electronics category as a whole. Exact selected product and imported review counts, source-file hashes, and selection details are recorded in `research/data_manifest.json`. Review timestamps span May 1996 through September 2023. The corpus is historical Amazon data and is not a live product or price feed.
 
 The curators state that they are not in a position to assign a license and that the files are provided primarily for research. This project treats the source files and local database as a restricted research copy; no review text or populated database is included in the repository. Any future public release or publication of source text requires separate rights review. The 43-row synthetic fixture is software test data only and is excluded from empirical analyses. No authorized Flipkart, Myntra, or Meesho data is currently included, so no cross-marketplace conclusions are made.
 
@@ -96,7 +96,7 @@ Annotators classify reviews into four mutually exclusive categories solely based
 ## 6. Experimental Design and Statistical Analysis
 
 ### 6.1 Domain Comparison and Dependence
-Comparisons between the two selected domains are exploratory and observational. Reviews are clustered within products and may also share reviewers; analyses must account for that dependence (for example, product-clustered bootstrap intervals) and report unadjusted counts and effect sizes. A naïve review-level $Z$-test or $χ^2$ test must not be treated as decisive evidence when its independence assumption is violated.
+Comparisons across the three domains are exploratory and observational. The Electronics subset is selected by source metadata review count while All Beauty and Appliances use their full category subsets, so the domain samples have different selection frames. Reviews are clustered within products and may also share reviewers; analyses must account for that dependence (for example, product-clustered bootstrap intervals) and report unadjusted counts and effect sizes. A naïve review-level $Z$-test or $χ^2$ test must not be treated as decisive evidence when its independence assumption is violated.
 
 If a two-proportion test is reported as a supplementary descriptive statistic:
 - We compute the **Two-Proportion $Z$-Test**:
@@ -105,7 +105,7 @@ If a two-proportion test is reported as a supplementary descriptive statistic:
 - **Effect Size**: Quantified using Cohen's $h = 2\arcsin(\sqrt{p_1}) - 2\arcsin(\sqrt{p_2})$.
 
 ### 6.2 Contingency Analysis
-For an exploratory overall sentiment distribution comparison between the two domains ($3 \times 2$ table), Pearson's $\chi^2$ Test of Independence and Cramér's $V$ may be reported alongside product-clustered uncertainty estimates:
+For an exploratory overall sentiment distribution comparison across the three domains ($3 \times 3$ table), Pearson's $\chi^2$ Test of Independence and Cramér's $V$ may be reported alongside product-clustered uncertainty estimates:
 $$V = \sqrt{\frac{\chi^2}{N(k-1)}}$$
 
 ---
@@ -123,7 +123,7 @@ $$V = \sqrt{\frac{\chi^2}{N(k-1)}}$$
 - Rating-text agreement/divergence: `[Pending; describe as agreement with a rating heuristic, not sentiment accuracy]`
 
 ### 7.3 Within-Source Domain Comparison
-- All Beauty vs Appliances sentiment and rating distributions: `[Pending descriptive analysis, product-clustered uncertainty estimates, and multiple-comparison plan]`
+- All Beauty, Appliances, and selected Electronics sentiment and rating distributions: `[Pending descriptive analysis, product-clustered uncertainty estimates, and multiple-comparison plan]`
 - No cross-platform test is supported by the current data.
 
 ---
