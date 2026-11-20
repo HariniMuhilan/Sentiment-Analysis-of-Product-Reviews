@@ -32,14 +32,6 @@ class PlatformResponse(BaseSchema):
     latest_date: Optional[datetime]
     has_data: bool
 
-class ProductSearchResult(BaseSchema):
-    id: int
-    name: str
-    category: Optional[str]
-    total_reviews: int
-    average_rating: Optional[float]
-    platforms: List[str]
-
 class SentimentBreakdown(BaseSchema):
     positive: int
     neutral: int
@@ -47,6 +39,24 @@ class SentimentBreakdown(BaseSchema):
     positive_pct: float
     neutral_pct: float
     negative_pct: float
+
+class ProductSearchPlatformStats(BaseSchema):
+    platform_code: str
+    platform_name: str
+    review_count: int
+    average_rating: Optional[float]
+    average_compound: Optional[float]
+    sentiment_breakdown: SentimentBreakdown
+
+class ProductSearchResult(BaseSchema):
+    id: int
+    name: str
+    category: Optional[str]
+    total_reviews: int
+    average_rating: Optional[float]
+    platforms: List[str]
+    sentiment_breakdown: SentimentBreakdown
+    platform_stats: List[ProductSearchPlatformStats]
 
 class PlatformStats(BaseSchema):
     platform_code: str
@@ -113,6 +123,29 @@ class ReviewListResponse(BaseSchema):
     page_size: int
     total_pages: int
     reviews: List[ReviewItem]
+
+class ProductDetailResponse(BaseSchema):
+    """Detailed information for a single selected product."""
+    id: int
+    name: str
+    category: Optional[str] = None
+    matching_query: Optional[str] = None
+
+    # Overall aggregates across all platforms
+    total_reviews: int
+    average_rating: Optional[float]
+    average_compound: Optional[float]
+    sentiment_breakdown: SentimentBreakdown
+
+    # Per-platform breakdown for this product (only platforms with data)
+    platform_stats: List[PlatformStats] = []
+
+    # Data coverage notice
+    data_coverage: DataCoverage
+
+    # Review pagination controls
+    total_pages: int
+    current_page: int
 
 class EvaluationClassMetrics(BaseSchema):
     precision: float

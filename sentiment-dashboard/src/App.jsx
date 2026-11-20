@@ -5,16 +5,20 @@ import Filters from './components/Filters';
 import SummaryCards from './components/SummaryCards';
 import PlatformComparison from './components/PlatformComparison';
 import ReviewList from './components/ReviewList';
+import ProductCard from './components/ProductCard';
+import ProductDetailModal from './components/ProductDetailModal';
 import DataProvenanceBanner from './components/DataProvenanceBanner';
 import ModelEvaluationModal from './components/ModelEvaluationModal';
 import { EmptyState, LoadingSkeleton } from './components/EmptyState';
-import { 
-  fetchHealth, 
-  fetchReadiness, 
-  fetchPlatforms, 
+import {
+  fetchHealth,
+  fetchReadiness,
+  fetchPlatforms,
   fetchCategories,
-  fetchSentimentAnalysis, 
-  fetchReviews 
+  fetchSentimentAnalysis,
+  fetchReviews,
+  searchCatalog,
+  getProductDetail
 } from './api/client';
 import './index.css';
 
@@ -41,6 +45,14 @@ function App() {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
+
+  const [catalogResults, setCatalogResults] = useState([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productDetail, setProductDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState(null);
 
   // Initialize status & platforms
   const initSystem = useCallback(async () => {
@@ -99,6 +111,57 @@ function App() {
       setReviewsLoading(false);
     }
   }, [pageSize]);
+
+  useEffect(() => {
+    const normalizedQuery = query.trim();
+    const selectedCategory = filters.category;
+    if (normalizedQuery.length < 2 && (!selectedCategory || selectedCategory === 'all')) {
+      setCatalogResults([]);
+      setCatalogError(null);
+      setCatalogLoading(false);
+      return undefined;
+    }
+
+    let active = true;
+    const timer = setTimeout(async () => {
+      setCatalogLoading(true);
+      setCatalogError(null);
+      try {
+        const results = await searchCatalog(normalizedQuery, selectedCategory);
+        if (active) setCatalogResults(results);
+      } catch (err) {
+        if (active) setCatalogError(err.message || 'Could not load matching products.');
+      } finally {
+        if (active) setCatalogLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [query, filters.category]);
+
+  const openProductDetail = async (productId) => {
+    setSelectedProduct(productId);
+    setProductDetail(null);
+    setDetailError(null);
+    setDetailLoading(true);
+    try {
+      const details = await getProductDetail(productId);
+      setProductDetail(details);
+    } catch (err) {
+      setDetailError(err.message || 'Could not load this product’s review analysis.');
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeProductDetail = () => {
+    setSelectedProduct(null);
+    setProductDetail(null);
+    setDetailError(null);
+  };
 
   // Trigger load on query or filters change
   useEffect(() => {
@@ -178,6 +241,31 @@ function App() {
 
         {/* Main Content Area */}
         <main className="content-container">
+          {(query.trim().length >= 2 || (filters.category && filters.category !== 'all')) && (
+            <section className="catalog-results" aria-labelledby="catalog-results-title">
+              <div className="catalog-results-heading">
+                <div>
+                  <p className="eyebrow">LOCAL PRODUCT CATALOG</p>
+                  <h2 id="catalog-results-title">Products matching your search</h2>
+                </div>
+                {!catalogLoading && <span className="catalog-result-count">{catalogResults.length} shown</span>}
+              </div>
+              {catalogLoading ? (
+                <p className="catalog-message" role="status">Finding matching products…</p>
+              ) : catalogError ? (
+                <p className="catalog-message catalog-error" role="alert">{catalogError}</p>
+              ) : catalogResults.length ? (
+                <div className="product-grid">
+                  {catalogResults.map((product) => (
+                    <ProductCard key={product.id} product={product} onOpenDetail={openProductDetail} />
+                  ))}
+                </div>
+              ) : (
+                <p className="catalog-message">No matching catalog products were found.</p>
+              )}
+            </section>
+          )}
+
           {loading ? (
             <LoadingSkeleton />
           ) : error ? (
@@ -207,7 +295,7 @@ function App() {
               />
 
               {/* Review Explorer */}
-              <ReviewList 
+              <ReviewList
                 reviews={reviewsData.reviews}
                 total={reviewsData.total}
                 page={page}
@@ -223,6 +311,14 @@ function App() {
         <ModelEvaluationModal 
           isOpen={isModelModalOpen} 
           onClose={() => setIsModelModalOpen(false)} 
+        />
+
+        <ProductDetailModal
+          product={productDetail}
+          loading={detailLoading}
+          error={detailError}
+          isOpen={selectedProduct !== null}
+          onClose={closeProductDetail}
         />
 
         {/* Footer */}

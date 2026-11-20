@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
 from app.database import get_db
-from app.schemas import PlatformResponse, ProductSearchResult
+from app.schemas import PlatformResponse, ProductSearchResult, ProductDetailResponse, ReviewListResponse
 from app.models import Platform, Product, Review
-from app.crud import get_product_search
+from app.crud import get_product_search, get_product_details, get_paginated_reviews
+from app.config import settings
 
 router = APIRouter(tags=["Catalog & Platforms"])
+
 
 @router.get("/categories", response_model=List[str])
 def list_categories(db: Session = Depends(get_db)):
@@ -59,3 +61,42 @@ def search_products(
 ):
     """Case-insensitive partial product name search on local catalog."""
     return get_product_search(db, query=q, limit=limit, category=category)
+
+
+@router.get("/products/{product_id}", response_model=ProductDetailResponse)
+def get_product_detail(
+    product_id: int,
+    db: Session = Depends(get_db)
+):
+    """Get full details for a single product including sentiment breakdown and platform stats.
+
+    Only includes platforms where reviews exist for THIS exact product.
+    Does not infer cross-platform identity from similar names.
+    """
+    product_details = get_product_details(db, product_id=product_id)
+
+    if product_details is None:
+        raise HTTPException(status_code=404, detail=f"Product with id={product_id} not found")
+
+    return product_details
+
+
+@router.get("/products/{product_id}/reviews", response_model=ReviewListResponse)
+def list_product_reviews(
+    product_id: int,
+    platform: Optional[str] = Query(None, description="Optional platform code filter"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """Return paginated reviews linked to this exact catalog product ID."""
+    if not db.query(Product.id).filter(Product.id == product_id).first():
+        raise HTTPException(status_code=404, detail=f"Product with id={product_id} not found")
+
+    return get_paginated_reviews(
+        db,
+        platform_code=platform,
+        page=page,
+        page_size=min(page_size, settings.MAX_PAGE_SIZE),
+        product_id=product_id,
+    )

@@ -1,13 +1,13 @@
 import React from 'react';
 import { Star, ThumbsUp, Calendar, ChevronLeft, ChevronRight, Tag } from 'lucide-react';
 
-export default function ReviewList({ 
-  reviews = [], 
-  total = 0, 
-  page = 1, 
-  totalPages = 1, 
+export default function ReviewList({
+  reviews = [],
+  total = 0,
+  page = 1,
+  totalPages = 1,
   onPageChange,
-  isLoading = false 
+  isLoading = false
 }) {
   const formatDate = (dateStr) => {
     if (!dateStr) return 'Date unknown';

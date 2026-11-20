@@ -143,6 +143,106 @@ def build_review_filter(
 
     return and_(*clauses) if clauses else True
 
+def get_product_details(db, product_id):
+    """Return correctly aggregated analysis for one exact catalog product."""
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if product is None:
+        return None
+
+    all_platforms = db.query(Platform).order_by(Platform.code).all()
+    platforms_by_id = {platform.id: platform for platform in all_platforms}
+    stats = db.query(
+        Review.platform_id.label("platform_id"),
+        func.count(Review.id).label("review_count"),
+        func.count(Review.rating).label("rated_count"),
+        func.avg(Review.rating).label("average_rating"),
+        func.avg(Review.compound_score).label("average_compound"),
+        func.sum(case((Review.sentiment == "POSITIVE", 1), else_=0)).label("positive"),
+        func.sum(case((Review.sentiment == "NEUTRAL", 1), else_=0)).label("neutral"),
+        func.sum(case((Review.sentiment == "NEGATIVE", 1), else_=0)).label("negative"),
+    ).filter(Review.product_id == product.id).group_by(Review.platform_id).all()
+
+    total_reviews = rated_total = positive = neutral = negative = 0
+    rating_weighted_sum = compound_weighted_sum = 0.0
+    platform_stats = []
+    platform_ids_with_data = set()
+
+    for row in stats:
+        platform = platforms_by_id.get(row.platform_id)
+        if platform is None:
+            continue
+        count = int(row.review_count or 0)
+        rated_count = int(row.rated_count or 0)
+        pos = int(row.positive or 0)
+        neu = int(row.neutral or 0)
+        neg = int(row.negative or 0)
+        total_reviews += count
+        rated_total += rated_count
+        positive += pos
+        neutral += neu
+        negative += neg
+        if rated_count and row.average_rating is not None:
+            rating_weighted_sum += float(row.average_rating) * rated_count
+        if count and row.average_compound is not None:
+            compound_weighted_sum += float(row.average_compound) * count
+        platform_ids_with_data.add(platform.id)
+
+        platform_stats.append({
+            "platform_code": platform.code,
+            "platform_name": platform.name,
+            "review_count": count,
+            "average_rating": round(float(row.average_rating), 2) if row.average_rating is not None else None,
+            "average_compound": round(float(row.average_compound), 4) if row.average_compound is not None else None,
+            "sentiment_breakdown": {
+                "positive": pos, "neutral": neu, "negative": neg,
+                "positive_pct": round(pos * 100 / count, 1) if count else 0.0,
+                "neutral_pct": round(neu * 100 / count, 1) if count else 0.0,
+                "negative_pct": round(neg * 100 / count, 1) if count else 0.0,
+            },
+            "wilson_positive_interval": calculate_wilson_interval(pos, count),
+            "statistical_notes": "Descriptive statistics for reviews linked to this exact product record.",
+        })
+
+    platforms_with_data = [p.code for p in all_platforms if p.id in platform_ids_with_data]
+    platforms_without_data = [p.code for p in all_platforms if p.id not in platform_ids_with_data]
+    average_rating = round(rating_weighted_sum / rated_total, 2) if rated_total else None
+    average_compound = round(compound_weighted_sum / total_reviews, 4) if total_reviews else None
+    sentiment_breakdown = {
+        "positive": positive,
+        "neutral": neutral,
+        "negative": negative,
+        "positive_pct": round(positive * 100 / total_reviews, 1) if total_reviews else 0.0,
+        "neutral_pct": round(neutral * 100 / total_reviews, 1) if total_reviews else 0.0,
+        "negative_pct": round(negative * 100 / total_reviews, 1) if total_reviews else 0.0,
+    }
+    data_coverage = {
+        "platforms_with_data": platforms_with_data,
+        "platforms_without_data": platforms_without_data,
+        "is_empty": total_reviews == 0,
+        "notice": (
+            f"Review data exists for {len(platforms_with_data)} platform(s) in the local database. "
+            "Missing platforms indicate that no dataset has been imported for that source; this does not indicate current availability."
+            if total_reviews else
+            "No review data is linked to this exact product record. Platform coverage reflects imported datasets, not current availability."
+        ),
+    }
+
+    return {
+        "id": product.id,
+        "name": product.name,
+        "category": product.category or "General",
+        "matching_query": None,
+        "total_reviews": total_reviews,
+        "average_rating": average_rating,
+        "average_compound": average_compound,
+        "sentiment_breakdown": sentiment_breakdown,
+        "platform_stats": platform_stats,
+        "data_coverage": data_coverage,
+        "total_pages": 1,
+        "current_page": 1,
+    }
+
+
 def get_product_search(
     db: Session,
     query: Optional[str] = None,
@@ -155,54 +255,96 @@ def get_product_search(
         Product.name,
         Product.category,
         review_count.label("total_reviews"),
-        func.avg(Review.rating).label("avg_rating")
+        func.count(Review.rating).label("rated_reviews"),
+        func.avg(Review.rating).label("average_rating"),
+        func.sum(case((Review.sentiment == "POSITIVE", 1), else_=0)).label("positive"),
+        func.sum(case((Review.sentiment == "NEUTRAL", 1), else_=0)).label("neutral"),
+        func.sum(case((Review.sentiment == "NEGATIVE", 1), else_=0)).label("negative"),
     ).outerjoin(Review, Review.product_id == Product.id)
+
     if category and category.lower() != "all":
         stmt = stmt.filter(Product.category == category.strip())
+
     phrase_match = None
     if query and query.strip():
         normalized = " ".join(query.strip().split())
         tokens = list(dict.fromkeys(re.findall(r"[\w]+", normalized, flags=re.UNICODE)))
         if tokens:
-            # Match multiword product searches as terms, even when a title puts
-            # the words in a different order or separates them with punctuation.
-            # Requiring every token avoids flooding results with unrelated items
-            # that happen to contain only one word from the query.
             for token in tokens:
                 token_pattern = f"%{token}%"
                 stmt = stmt.filter(or_(Product.name.ilike(token_pattern), Product.category.ilike(token_pattern)))
             phrase_match = Product.name.ilike(f"%{normalized}%")
-    
+
     stmt = stmt.group_by(Product.id, Product.name, Product.category)
-    if phrase_match is not None:
-        stmt = stmt.order_by(phrase_match.desc(), review_count.desc(), Product.name.asc())
-    else:
-        stmt = stmt.order_by(review_count.desc(), Product.name.asc())
-    stmt = stmt.limit(limit)
-    rows = stmt.all()
-
+    stmt = stmt.order_by(phrase_match.desc(), review_count.desc(), Product.name.asc()) if phrase_match is not None else stmt.order_by(review_count.desc(), Product.name.asc())
+    rows = stmt.limit(limit).all()
     product_ids = [row.id for row in rows]
-    platforms_by_product: Dict[int, set[str]] = {product_id: set() for product_id in product_ids}
-    if product_ids:
-        platform_rows = db.query(Review.product_id, Platform.name).join(
-            Platform, Review.platform_id == Platform.id
-        ).filter(Review.product_id.in_(product_ids)).distinct().all()
-        for product_id, platform_name in platform_rows:
-            platforms_by_product[product_id].add(platform_name)
 
-    return [
-        {
-            # Return the real database key so product detail requests continue
-            # to refer to the same product after filtering and pagination.
+    platform_rows = []
+    if product_ids:
+        platform_rows = db.query(
+            Review.product_id.label("product_id"),
+            Platform.code.label("platform_code"),
+            Platform.name.label("platform_name"),
+            func.count(Review.id).label("review_count"),
+            func.count(Review.rating).label("rated_reviews"),
+            func.avg(Review.rating).label("average_rating"),
+            func.avg(Review.compound_score).label("average_compound"),
+            func.sum(case((Review.sentiment == "POSITIVE", 1), else_=0)).label("positive"),
+            func.sum(case((Review.sentiment == "NEUTRAL", 1), else_=0)).label("neutral"),
+            func.sum(case((Review.sentiment == "NEGATIVE", 1), else_=0)).label("negative"),
+        ).join(Platform, Review.platform_id == Platform.id).filter(
+            Review.product_id.in_(product_ids)
+        ).group_by(Review.product_id, Platform.code, Platform.name).all()
+
+    platform_stats_by_product: Dict[int, List[Dict[str, Any]]] = {product_id: [] for product_id in product_ids}
+    for row in platform_rows:
+        count = int(row.review_count or 0)
+        positive = int(row.positive or 0)
+        neutral = int(row.neutral or 0)
+        negative = int(row.negative or 0)
+        platform_stats_by_product[row.product_id].append({
+            "platform_code": row.platform_code,
+            "platform_name": row.platform_name,
+            "review_count": count,
+            "average_rating": round(float(row.average_rating), 2) if row.average_rating is not None else None,
+            "average_compound": round(float(row.average_compound), 4) if row.average_compound is not None else None,
+            "sentiment_breakdown": {
+                "positive": positive,
+                "neutral": neutral,
+                "negative": negative,
+                "positive_pct": round(positive * 100 / count, 1) if count else 0.0,
+                "neutral_pct": round(neutral * 100 / count, 1) if count else 0.0,
+                "negative_pct": round(negative * 100 / count, 1) if count else 0.0,
+            },
+        })
+
+    results = []
+    for row in rows:
+        count = int(row.total_reviews or 0)
+        positive = int(row.positive or 0)
+        neutral = int(row.neutral or 0)
+        negative = int(row.negative or 0)
+        platform_stats = platform_stats_by_product[row.id]
+        results.append({
             "id": row.id,
             "name": row.name,
             "category": row.category or "General",
-            "total_reviews": row.total_reviews,
-            "average_rating": round(float(row.avg_rating), 2) if row.avg_rating else None,
-            "platforms": sorted(platforms_by_product[row.id]),
-        }
-        for row in rows
-    ]
+            "total_reviews": count,
+            "average_rating": round(float(row.average_rating), 2) if row.average_rating is not None else None,
+            "platforms": sorted({stat["platform_name"] for stat in platform_stats}),
+            "sentiment_breakdown": {
+                "positive": positive,
+                "neutral": neutral,
+                "negative": negative,
+                "positive_pct": round(positive * 100 / count, 1) if count else 0.0,
+                "neutral_pct": round(neutral * 100 / count, 1) if count else 0.0,
+                "negative_pct": round(negative * 100 / count, 1) if count else 0.0,
+            },
+            "platform_stats": sorted(platform_stats, key=lambda stat: (-stat["review_count"], stat["platform_code"])),
+        })
+
+    return results
 
 def get_aggregated_analysis(
     db: Session,
@@ -434,11 +576,14 @@ def get_paginated_reviews(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     page: int = 1,
-    page_size: int = 20
+    page_size: int = 20,
+    product_id: Optional[int] = None,
 ) -> Dict[str, Any]:
     filter_clause = build_review_filter(
         db, query, platform_code, category, min_rating, max_rating, sentiment, start_date, end_date
     )
+    if product_id is not None:
+        filter_clause = and_(filter_clause, Review.product_id == product_id)
 
     total = db.query(func.count(Review.id)).filter(filter_clause).scalar() or 0
     total_pages = max(1, math.ceil(total / page_size))

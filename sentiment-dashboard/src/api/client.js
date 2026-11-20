@@ -40,7 +40,7 @@ export async function searchCatalog(query, category) {
   const params = new URLSearchParams();
   if (query) params.append('q', query);
   if (category && category !== 'all') params.append('category', category);
-  params.append('limit', '10');
+  params.append('limit', '50');
   const res = await fetch(`${API_BASE}/products?${params.toString()}`);
   return handleResponse(res);
 }
@@ -111,5 +111,25 @@ export async function ingestDatasetFile(platform, file) {
     method: 'POST',
     body: formData
   });
+  return handleResponse(res);
+}
+
+export async function getProductDetail(productId) {
+  try {
+    const res = await fetch(`${API_BASE}/products/${productId}`);
+    if (!res.ok) {
+      throw new Error(`Product ${productId} not found: HTTP ${res.status}`);
+    }
+    return await res.json();
+  } catch (err) {
+    console.error('Error fetching product detail:', err);
+    throw err;
+  }
+}
+
+export async function fetchProductReviews(productId, { platform, page = 1, pageSize = 10 } = {}) {
+  const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+  if (platform && platform !== 'all') params.set('platform', platform);
+  const res = await fetch(`${API_BASE}/products/${productId}/reviews?${params.toString()}`);
   return handleResponse(res);
 }
