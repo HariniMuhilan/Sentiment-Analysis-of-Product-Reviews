@@ -1,5 +1,7 @@
 # Sentiment Analysis Review
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/HariniMuhilan/Sentiment-Analysis-of-Product-Reviews)
+
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19.2-61DAFB.svg?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8.1-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -89,6 +91,24 @@ $$w = \frac{\hat{p} + \frac{z^2}{2N} \pm z \sqrt{\frac{\hat{p}(1-\hat{p})}{N} + 
 ---
 
 ## 🚀 Quick Start Guide
+
+### Run from GitHub Codespaces
+
+For a browser-based workspace, choose **Code → Codespaces → Create codespace on main**. The repository's Codespaces setup installs the backend and frontend dependencies, seeds the demo corpus, and opens the dashboard on port 5173 with live reload. Each teammate needs access to this repository and can create their own Codespace to work on a separate copy.
+
+The first startup seeds a fresh database with the included **2,370-review Virtual Assistant Devices dataset** (Mendeley Data, CC BY 4.0). It covers five retailers and ten named devices; it is a small research demo, not a broad product catalog. Attribution and dataset limitations are documented in [`Datasets/VirtualAssistantDevices/README.md`](Datasets/VirtualAssistantDevices/README.md). The local Amazon corpus and database are not part of the Codespace or ZIP.
+
+### Run from a downloaded ZIP on Windows, macOS, or Linux
+
+Install Docker Desktop (or Docker Engine with the Compose plugin), download **Code → Download ZIP**, extract it, open a terminal in the extracted project folder, then run:
+
+```bash
+docker compose up --build
+```
+
+Open `http://localhost:8080` for the dashboard and `http://localhost:8002/docs` for the API documentation. The first start imports the included licensed demo corpus automatically. The database is kept in a local Docker volume. Press `Ctrl+C` to stop the containers; run `docker compose down` to stop and remove them while retaining that database.
+
+This repository provides a Codespaces-run application and a locally runnable ZIP. It does not yet host a permanent public website: GitHub Pages cannot run the Python API or database. A permanent public deployment needs a separately hosted backend and a dataset cleared for public hosting.
 
 ### Prerequisites
 - **Python 3.12+**

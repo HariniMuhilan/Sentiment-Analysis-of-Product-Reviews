@@ -1,21 +1,26 @@
-version: '3.8'
-
 services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: sentiment_backend
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8002}:8000"
     environment:
-      - ENVIRONMENT=production
+      # Local research/demo stack; this is not a public production deployment.
+      - ENVIRONMENT=development
+      # SQLite database path - stored in persistent volume
       - DATABASE_URL=sqlite:////data/sentiment_research.db
-      - CORS_ORIGINS=["http://localhost", "http://localhost:80", "http://localhost:5173", "http://127.0.0.1:5173"]
       - RATE_LIMIT_PER_MINUTE=120
     volumes:
+      # SQLite database volume - persistent storage for research data
       - backend_data:/data
+      # This dataset is documented in Datasets/VirtualAssistantDevices/README.md
+      # under CC BY 4.0 and is the small, shareable starter corpus.
+      - ./Datasets/VirtualAssistantDevices/processed/virtual_assistant_reviews.csv:/seed/virtual_assistant_reviews.csv:ro
+    command: >-
+      sh -c "python seed_demo_data.py --file /seed/virtual_assistant_reviews.csv
+      && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 30s
@@ -27,10 +32,9 @@ services:
     build:
       context: ./sentiment-dashboard
       dockerfile: Dockerfile
-    container_name: sentiment_frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${FRONTEND_PORT:-8080}:80"
     depends_on:
       backend:
         condition: service_healthy

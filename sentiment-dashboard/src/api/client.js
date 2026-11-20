@@ -1,6 +1,6 @@
-// The local API binds to IPv4 loopback (127.0.0.1). Using `localhost` can
-// resolve to IPv6 ::1 on Windows and leave the dashboard stuck offline.
-const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+// Same-origin /api works with the Vite proxy, Docker's Nginx proxy, and
+// GitHub Codespaces port forwarding. Set VITE_API_URL only for a remote API.
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 async function handleResponse(res) {
   if (!res.ok) {
