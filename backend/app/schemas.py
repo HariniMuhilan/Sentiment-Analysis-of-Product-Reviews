@@ -161,6 +161,29 @@ class EvaluationReport(BaseSchema):
     confusion_matrix: Dict[str, Dict[str, int]]
     class_distribution: Dict[str, Dict[str, int]]
 
+class ProductCrossPlatformAnalysisResponse(BaseSchema):
+    """Cross-retailer sentiment analysis for a single product across platforms."""
+    # Overall aggregate metrics
+    total_reviews: int
+    average_rating: Optional[float]
+    average_compound: Optional[float]
+    overall_sentiment_breakdown: SentimentBreakdown
+
+    # Per-platform statistics
+    platform_stats: List[Dict[str, Any]]
+
+    # Statistical comparison (leader vs runner-up)
+    leader_platform: Optional[str] = None
+    is_significant: bool
+    z_statistic: Optional[float]
+    p_value: Optional[float]
+    effect_size: Optional[float]
+    explanation: str
+
+    # Data coverage notice
+    total_platforms_analyzed: int
+    data_coverage_notice: str
+
 class FullEvaluationResponse(BaseSchema):
     overall: EvaluationReport
     per_platform: Dict[str, EvaluationReport]
